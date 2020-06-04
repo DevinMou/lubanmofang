@@ -67,17 +67,21 @@ function createPoint(){
   function getStart(){
   
   }
-  
-  function oneStream(point,v,margin,rest) {
+  // v1->[c1].forEach->v2->[c2-v1]
+  function oneStream(point,nums,a0,a,margin) {
     let c = Object.keys(points[point])
-  
+    const a0Flat = a0.flat()
+    c = getDiffArr(c,null,a0Flat)
+    margin = getDiffArr(margin,a0Flat,[point])
     Object.keys(c).forEach(item=>{
-  
+      oneStream(item,nums,[...a0])
     })
   }
   
-  function getDiffArr(a,b){
-    
+  function getDiffArr(a,b,c){
+    const set = a instanceof Set ? (b?(b.forEach(item=>a.add(item)),a):a) : new Set(a.concat(b||[]))
+    c&&c.forEach(item=>set.delete(item))
+    return [...set]
   }
   
   function getKeys(a0,a1,point) {

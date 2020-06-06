@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style id="app-style">
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .perspective {
+      backface-visibility: hidden;
+      transform-style: preserve-3d;
+      position: fixed;
+      top: 0;
+      font-size: 0;
+      left: 0;
+      margin: 10%;
+      background: transparent;
+      width: 80%;
+      height: 80%;
+      perspective-origin: center;
+      transform: rotateX(75deg) rotateZ(-20deg);
+    }
+
+    .background-board {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: #eeeeee80;
+    }
+
+    .container {
+      display: inline-block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-style: preserve-3d;
+    }
+
+    .zft {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      transform-style: preserve-3d;
+    }
+
+    .zft span {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0% 0%;
+      background: inherit;
+      opacity: .5;
+    }
+
+    .zft span:nth-child(2) {
+      transform: rotateX(90deg);
+    }
+
+    .zft span:nth-child(3) {
+      transform: translateX(100%) rotateY(-90deg);
+    }
+
+    .zft span:nth-child(4) {
+      transform: translateY(100%) rotateX(90deg);
+    }
+
+    .zft span:nth-child(5) {
+      transform: rotateY(-90deg);
+    }
+
+    .zft.h1 span:nth-child(1),
+    .zft.h2 span:nth-child(2),
+    .zft.h3 span:nth-child(3),
+    .zft.h4 span:nth-child(4),
+    .zft.h5 span:nth-child(5),
+    .zft.h6 span:nth-child(6) {
+      background: transparent;
+    }
+  </style>
+  <style id="var-style">
+    .background-board {
+      transform: translateZ(-90px);
+    }
+
+    .container {
+      width: 60px;
+      height: 60px;
+      transform: translate3d(-50%, -50%, -30px);
+    }
+
+    .zft span:nth-child(6) {
+      transform: translateZ(60px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="perspective">
+    <div class="background-board"></div>
+    <div class="container"></div>
+  </div>
+</body>
+<script src="./index.js"></script>
+<script>
+  var size = 60
+  const ReactData = new Proxy({ size: 60 }, {
+    set(target, propKey, value) {
+      switch (propKey) {
+        case 'size':
+          if (target[propKey] !== value) {
+            const sheet = target.$varStyle.sheet
+            sheet.removeRule(0)
+            sheet.removeRule(0)
+            sheet.removeRule(0)
+            sheet.insertRule(`.zft span:nth-child(6) {transform: translateZ(${value}px);}`, 0)
+            sheet.insertRule(`.container {width: ${value}px;height: ${value}px;transform: translate3d(-50%,-50%,-${value / 2}px);}`, 0)
+            sheet.insertRule(`.background-board {transform: translateZ(-${value * 1.5 - (target.boardAbove || 0)}px);}`, 0)
+          }
+          break
+        case 'boardAbove':
+          if (target[propKey] !== value && typeof value === 'number') {
+            sheet.removeRule(0)
+            sheet.insertRule(`.background-board {transform: translateZ(-${value * 1.5 - (target.boardAbove || 0)}px);}`, 0)
+          }
+          break
+        default:
+          break
+      }
+      target[propKey] = value
+      return true
+    }
+  })
+  class One {
+    constructor(parentNode, site) {
+      const _this = this
+      _this.site = [...site]
+      parentNode.appendChild(_this.createEl())
+      _this.style = new Proxy({}, {
+        set(target, propKey, value) {
+          if (typeof value === string && target[propKey] !== value) {
+            target[propKey] = value
+            _this.upStyle()
+            return true
+          } else {
+            return false
+          }
+        },
+        deleteProperty(target, propKey) {
+          delete target[propKey]
+          _this.upStyle
+          return true
+        }
+      })
+    }
+    upStyle() {
+      this.el.style = this.styleobj2str(this.style)
+    }
+    styleobj2str(obj) {
+      obj = obj || {}
+      obj.width = obj.width || size
+      obj.height = obj.height || size
+      obj.background = obj.background || 'red'
+      obj.transform = obj.transform || { translate: [] }
+      for (let name in obj) {
+        const value = obj[name]
+        const tp = typeof value
+        switch (name) {
+          case 'width': case 'height':
+            if (tp === 'number') {
+              obj[name] = value + 'px'
+            } else if (tp !== 'stirng') {
+              delete obj[name]
+            }
+            break
+          case 'transform':
+            if (tp === 'object') {
+              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0)) * size}px,${(this.site[1] - 1 + (value.translate[1] || 0)) * size}px,${(this.site[0] - 1 + (value.translate[2] || 0)) * size}px)` : '',
+              value.rotate ? [
+                value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : '',
+                value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : '',
+                value.rotate[2] ? `rotateZ(${value.rotate[2]}deg)` : ''].join(' ') : ''].join(' ')
+            } else if (tp !== 'string') {
+              delete obj[name]
+            }
+            break
+          default:
+            if (tp !== 'string') {
+              delete obj[name]
+            }
+            break
+        }
+      }
+      return Object.keys(obj).map(key => `${key}:${obj[key]}`).join(';')
+    }
+    createEl() {
+      const zft = document.createElement('div')
+      zft.className = 'zft'
+      zft.style = this.styleobj2str()
+      for (let i = 0; i < 6; i++) {
+        zft.appendChild(document.createElement('span'))
+      }
+      this.el = zft
+      return zft
+    }
+    getEl() {
+
+    }
+  }
+  function ready(fn) {
+    document.addEventListener('DOMContentLoaded', function readyFn() {
+      document.removeEventListener('DOMContentLoaded', readyFn, false)
+      fn()
+    }, false)
+  }
+  ready(function () {
+    function createBlock(arr) { // [1000, 2000, 3644]
+      const group = document.createElement('div')
+      arr.forEach((item, index) => {
+
+      })
+    }
+    ReactData.$body = document.body
+    ReactData.$pb = document.querySelector('.perspective')
+    ReactData.$ct = document.querySelector('.container')
+    ReactData.$varStyle = document.querySelector('#var-style')
+    const { $body, $pb, $ct } = ReactData
+    let r = 1
+    let startPos = null
+    let posRotate = [75, -20]
+    if ($pb) {
+      function mouseMove(event) {
+        if (event.buttons !== 1) {
+          $body.onmousemove = null
+        } else {
+          let dx = event.pageX - startPos[0]
+          let dy = event.pageY - startPos[1]
+          $pb.style.transform = `rotateX(${posRotate[0] - dy * r}deg) rotateZ(${posRotate[1] - dx * r}deg)`
+        }
+      }
+      $body.onmousedown = function (event) {
+        startPos = [event.pageX, event.pageY]
+        $body.onmousemove = mouseMove
+      }
+      $body.onmouseup = function (event) {
+        posRotate[1] -= event.pageX - startPos[0]
+        posRotate[0] -= event.pageY - startPos[1]
+        startPos = null
+        $body.onmousemove = null
+      }
+
+      const luban = []
+      const df = document.createDocumentFragment()
+      for (let f = 0; f < 3; f++) {
+        luban[f] = luban[f] || []
+        let floor = luban[f]
+        for (let r = 0; r < 3; r++) {
+          floor[r] = floor[r] || []
+          let row = floor[r]
+          for (let c = 0; c < 3; c++) {
+            row[c] = row[c] || []
+            let col = row[c]
+            col.push(new One(df, [f, r, c]))
+          }
+        }
+      }
+      $ct.appendChild(df)
+    }
+  })
+</script>
+</html>

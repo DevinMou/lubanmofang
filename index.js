@@ -1,3 +1,7 @@
+Array.prototype.number = function () {
+  return this.map(item => -(-item))
+}
+
 function createPoint() {
   const points = {}
   const er = [4, 2, 1]
@@ -5,26 +9,32 @@ function createPoint() {
     for (let j = 2; j >= 0; j--) {
       for (let h = 0; h < 3; h++) {
         let point = i * 1000 + er[h] * 10 ** j
-        points[point] = getEdge(i, j, er[h])
+        points[point] = getEdge(i, j, er[h], points)
       }
     }
   }
   return points
 }
 
-function getEdge(floor, site, num) {
-  const res = []
+function getEdge(floor, site, num, points) {
+  const res = {}
   let floors = floor === 1 ? [2] : floor === 2 ? [1, 3] : [2]
   let sites = site === 0 ? [1] : site === 1 ? [0, 2] : [1]
   let nums = num === 4 ? [2] : num === 2 ? [4, 1] : [2]
-  floors.forEach(item => {
-    res.push(item * 1000 + num * 10 ** site)
+  floors.forEach((item, index) => {
+    const k = item * 1000 + num * 10 ** site
+    points[k] = points[k] || {}
+    res[k] = { cs: floor === 1 ? 0 : floor === 2 ? [5, 0][index] : 5, point: points[k] }
   })
-  sites.forEach(item => {
-    res.push(floor * 1000 + num * 10 ** item)
+  sites.forEach((item, index) => {
+    const k = floor * 1000 + num * 10 ** item
+    points[k] = points[k] || {}
+    res[k] = { cs: site === 0 ? 1 : site === 1 ? [4, 1][index] : 4, point: points[k] }
   })
-  nums.forEach(item => {
-    res.push(floor * 1000 + item * 10 ** site)
+  nums.forEach((item, index) => {
+    const k = floor * 1000 + item * 10 ** site
+    points[k] = points[k] || {}
+    res[k] = { cs: num === 4 ? 2 : num === 2 ? [3, 2][index] : 3, point: points[k] }
   })
   return res
 }
@@ -79,37 +89,44 @@ function oneStream(point, nums, a0, a, margin) {
     a.push(a0)
     if (nums.length > 1) {//nums[4,4] 
       nums.shift()
-      margin = getDiffArr(margin, points[point], [point])
+      margin = getDiffArr(margin, Object.keys(points[point]).number(), [point])
       margin.forEach(item => {
-        oneStream(item, [...nums], [], a.map(item => [...item]), margin)
+        if (oneStream(item, [...nums], [], a.map(item => [...item]), margin)) {
+          return true
+        }
       })
     } else {//over
       //count.push(a.map(item=>[...item]))
       //console.log(count.length)
       if (equl(allArr, sortArr(a))) {
+        console.log(allArr)
+        return true
         ++count
         count % 100 === 0 && console.log(count, repeat)
       }
     }
   } else {
-    let c = points[point] //cp
+    let c = Object.keys(points[point]).number() //cp
     const aFlat = a.flat().concat(a0) //a
     c = getDiffArr(c, null, aFlat)//[cp-a]\
     margin = getDiffArr(margin, c, [point])
     c.forEach(item => {
-      oneStream(item, [...nums], [...a0, point], a, margin)
+      if (oneStream(item, [...nums], [...a0, point], a, margin)) {
+        return true
+      }
     })
   }
+  return true
 }
 
 function getDiffArr(a, b, c) {
   const set = a instanceof Set ? (b ? (b.forEach(item => a.add(item)), a) : a) : new Set(a.concat(b || []))
   c && c.forEach(item => set.delete(item))
-  return [...set]
+  return [...set].number()
 }
 
 function getKeys(a0, a1, point) {
-  const pobj = point ? points[point] : Object.keys(points).map(item => -(-item))
+  const pobj = point ? Object.keys(points[point]).number() : Object.keys(points).number()
   const a = a0.concat(a1).flat(Infinity)
   const res = []
   for (let p in pobj) {
@@ -169,7 +186,7 @@ const allArr = { hax: {}, hub: [] }
 const path = []
 console.time('lb')
 //  once([],[],[4,4,4,4,4,4],2,-(-Object.keys(points)[0]),allArr,path)
-// oneStream(-(-Object.keys(points)[0]),[4,4,4,4,4,4],[],[[1001,2001,3001]],[])
+// oneStream(-(-Object.keys(points)[0]), [3, 4, 4, 4, 4, 4, 4], [], [], [])
 console.timeEnd('lb')
 
 function matrixRotate(x, y) {

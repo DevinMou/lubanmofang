@@ -48,6 +48,7 @@
       width: 100%;
       height: 100%;
       display: block;
+      background: transparent;
       transform-style: preserve-3d;
     }
 
@@ -58,7 +59,6 @@
       top: 0;
       left: 0;
       transform-origin: 0% 0%;
-      background: inherit;
       opacity: .5;
     }
 
@@ -71,11 +71,11 @@
     }
 
     .zft span:nth-child(4) {
-      transform: translateY(100%) rotateX(90deg);
+      transform: rotateY(-90deg);
     }
 
     .zft span:nth-child(5) {
-      transform: rotateY(-90deg);
+      transform: translateY(100%) rotateX(90deg);
     }
 
     .zft.h1 span:nth-child(1),
@@ -84,7 +84,7 @@
     .zft.h4 span:nth-child(4),
     .zft.h5 span:nth-child(5),
     .zft.h6 span:nth-child(6) {
-      background: transparent;
+      background: transparent !important;
     }
   </style>
   <style id="var-style">
@@ -112,7 +112,6 @@
 </body>
 <script src="./index.js"></script>
 <script>
-  var size = 60
   const ReactData = new Proxy({ size: 60 }, {
     set(target, propKey, value) {
       switch (propKey) {
@@ -144,32 +143,49 @@
     constructor(parentNode, site) {
       const _this = this
       _this.site = [...site]
+      _this.hideFace = {}
       parentNode.appendChild(_this.createEl())
       _this.style = new Proxy({}, {
         set(target, propKey, value) {
-          if (typeof value === string && target[propKey] !== value) {
+          if (typeof value === 'string' && target[propKey] !== value) {
             target[propKey] = value
-            _this.upStyle()
+            _this.upStyle(propKey, value)
             return true
           } else {
-            return false
+            return true
           }
         },
         deleteProperty(target, propKey) {
           delete target[propKey]
-          _this.upStyle
+          _this.upStyle(propKey)
           return true
         }
       })
     }
-    upStyle() {
-      this.el.style = this.styleobj2str(this.style)
+    upStyle(key, value) {
+      const childrenStyle = ['background', 'opacity']
+      if (value !== void 0) {
+        if (childrenStyle.includes(key)) {
+          Array.prototype.forEach.call(this.el.children, node => {
+            node.style.setProperty(key, value)
+          })
+        } else {
+          this.el.style.setProperty(key, value)
+        }
+      } else {
+        if (childrenStyle.includes(key)) {
+          Array.prototype.forEach.call(this.el.children, node => {
+            node.style.removeProperty(key)
+          })
+        } else {
+          this.el.style.removeProperty(key)
+        }
+      }
     }
     styleobj2str(obj) {
       obj = obj || {}
-      obj.width = obj.width || size
-      obj.height = obj.height || size
-      obj.background = obj.background || 'red'
+      obj.width = obj.width || ReactData.size
+      obj.height = obj.height || ReactData.size
       obj.transform = obj.transform || { translate: [] }
       for (let name in obj) {
         const value = obj[name]
@@ -184,7 +200,7 @@
             break
           case 'transform':
             if (tp === 'object') {
-              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0)) * size}px,${(this.site[1] - 1 + (value.translate[1] || 0)) * size}px,${(this.site[0] - 1 + (value.translate[2] || 0)) * size}px)` : '',
+              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0)) * ReactData.size}px,${(this.site[1] - 1 + (value.translate[1] || 0)) * ReactData.size}px,${(this.site[0] - 1 + (value.translate[2] || 0)) * ReactData.size}px)` : '',
               value.rotate ? [
                 value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : '',
                 value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : '',
@@ -212,8 +228,76 @@
       this.el = zft
       return zft
     }
-    getEl() {
+    setHideClass() {
+      this.el.className = ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
+    }
+    hide() {
+      this.upStyle('opacity', '0')
+    }
+    show() {
+      this.upStyle('opacity', this.style.opacity || '1')
+    }
+  }
 
+  class Block {
+    constructor(numArr, luban, bgColor, parent) {
+      this.arr = [...numArr]
+      this.hub = {}
+      this.parent = parent
+      this.bgColor = bgColor
+      numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
+        a.forEach((b, bi) => {
+          b.forEach((c, ci) => {
+            if (c) {
+              const str = (ai + 1) * 1000 + [4, 2, 1][ci] * 10 ** (2 - bi)
+              this.hub[str] = luban[2 - ai][bi][ci]
+            }
+          })
+        })
+      })
+      this.setHideFace(bgColor)
+    }
+
+    setHideFace(color) {
+      for (let point in this.hub) {
+        const one = this.hub[point]
+        const cp = points[point]
+        for (let c in cp) {
+          const p = cp[c]
+          if (c in this.hub) {
+            this.hub[c].hideFace[5 - p.cs] = point
+            one.hideFace[p.cs] = c
+          }
+        }
+      }
+      for (let k in this.hub) {
+        this.hub[k].style.background = color
+        this.hub[k].setHideClass()
+      }
+    }
+    setStyle(style) {
+      for (let k in this.hub) {
+        Object.assign(this.hub[k].style, style)
+      }
+    }
+    hideSelf() {
+      for (let k in this.hub) {
+        this.hub[k].hide()
+      }
+    }
+    showSelf() {
+      for (let k in this.hub) {
+        this.hub[k].show()
+      }
+    }
+    hideOther() {
+      this.parent.forEach(item => {
+        if (item !== this) {
+          item.hideSelf()
+        } else {
+          item.showSelf()
+        }
+      })
     }
   }
   function ready(fn) {
@@ -259,21 +343,61 @@
       }
 
       const luban = []
+
+      function package(arr) { // [x7]
+        return arr.map(item => new Block(item, luban))
+      }
+
       const df = document.createDocumentFragment()
-      for (let f = 0; f < 3; f++) {
+      for (let f = 2; f >= 0; f--) {
         luban[f] = luban[f] || []
         let floor = luban[f]
         for (let r = 0; r < 3; r++) {
           floor[r] = floor[r] || []
           let row = floor[r]
           for (let c = 0; c < 3; c++) {
-            row[c] = row[c] || []
-            let col = row[c]
-            col.push(new One(df, [f, r, c]))
+            row[c] = new One(df, [f, r, c])
           }
         }
       }
       $ct.appendChild(df)
+      ReactData.collection = {
+        arr: [],
+        load(data, colors) {
+          this.arr.length = 0
+          data.forEach((a, i) => this.arr.push(new Block(a, luban, colors[i] || 'white', this.arr)))
+        }
+      }
+      ReactData.collection.load(
+        [
+          [1000, 2000, 3223],
+          [1000, 2047, 3000],
+          [1000, 2110, 3110],
+          [1000, 2400, 3444],
+          [1007, 2000, 3000],
+          [1300, 2220, 3000],
+          [1470, 2000, 3000],
+        ]
+/*         [
+          [1000, 2000, 3017],
+          [1000, 2017, 3000],
+          [1000, 2200, 3640],
+          [1000, 2460, 3020],
+          [1000, 2660, 3000],
+          [1007, 2000, 3000],
+          [1110, 2100, 3100]
+        ] */
+        /* points2arrs([
+          [1001, 1002, 1004],
+          [1010, 1020, 1040, 1400],
+          [1100, 1200, 2020, 2200],
+          [2001, 2002, 2004, 2040],
+          [2010, 2100, 3010, 3100],
+          [2400, 3004, 3040, 3400],
+          [3001, 3002, 3020, 3200]
+        ]) */, ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple']
+      )
+      console.log(ReactData.collection)
     }
   })
 </script>

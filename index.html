@@ -290,6 +290,11 @@
         this.hub[k].show()
       }
     }
+    hideSelf() {
+      for (let k in this.hub) {
+        this.hub[k].hide()
+      }
+    }
     hideOther() {
       this.parent.forEach(item => {
         if (item !== this) {
@@ -366,7 +371,27 @@
         load(data, colors) {
           this.arr.length = 0
           data.forEach((a, i) => this.arr.push(new Block(a, luban, colors[i] || 'white', this.arr)))
-        }
+        },
+        show(indexs) {
+          const isArr = Array.isArray(indexs)
+          this.arr.forEach((item, index) => {
+            if ((isArr && isArr.includes(index)) || index === indexs) {
+              item.showSelf()
+            } else {
+              item.hideSelf()
+            }
+          })
+        },
+        hide(indexs) {
+          const isArr = Array.isArray(indexs)
+          this.arr.forEach((item, index) => {
+            if ((isArr && isArr.includes(index)) || index === indexs) {
+              item.hideSelf()
+            } else {
+              item.showSelf()
+            }
+          })
+        },
       }
       ReactData.collection.load(
         [
@@ -397,7 +422,7 @@
           [3001, 3002, 3020, 3200]
         ]) */, ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple']
       )
-      console.log(ReactData.collection)
+      window.$luban = ReactData.collection
     }
   })
 </script>

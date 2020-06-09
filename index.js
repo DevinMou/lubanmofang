@@ -87,23 +87,26 @@ function oneStream(point, nums, a0, a, margin) {
   if (nums[0] === 0) {
     a0.push(point)
     a.push(a0)
-    if (nums.length > 1) {//nums[4,4] 
+    if (nums.length === 2) {
+      const rest = getDiffArr(Object.keys(points[point]).number(), null, a.flat())
+      if (isConnect(rest, (a, b) => b in points[a])) {
+        a.push(rest)
+        if (equl(allArr, sortArr(a))) {
+          console.log(allArr)
+          ++count
+          count % 100 === 0 && console.log(count, repeat)
+          return true
+        }
+      }
+    }
+    else if (nums.length > 1) {//nums[4,4] 
       nums.shift()
-      margin = getDiffArr(margin, Object.keys(points[point]).number(), [point])
+      margin = getDiffArr(margin, Object.keys(points).number(), [point])
       margin.forEach(item => {
         if (oneStream(item, [...nums], [], a.map(item => [...item]), margin)) {
           return true
         }
       })
-    } else {//over
-      //count.push(a.map(item=>[...item]))
-      //console.log(count.length)
-      if (equl(allArr, sortArr(a))) {
-        console.log(allArr)
-        return true
-        ++count
-        count % 100 === 0 && console.log(count, repeat)
-      }
     }
   } else {
     let c = Object.keys(points[point]).number() //cp
@@ -111,7 +114,7 @@ function oneStream(point, nums, a0, a, margin) {
     c = getDiffArr(c, null, aFlat)//[cp-a]\
     margin = getDiffArr(margin, c, [point])
     c.forEach(item => {
-      if (oneStream(item, [...nums], [...a0, point], a, margin)) {
+      if (oneStream(item, [...nums], [...a0, point], a.map(item => [...item]), margin)) {
         return true
       }
     })

@@ -66,12 +66,7 @@ function isConnect(arr, fn) {
       return a
     })
   })
-  for (let i = 0; i < res.length; i++) {
-    if (res[i] === 0) {
-      return false
-    }
-  }
-  return true
+  return res.reduce((a, b) => a + b) >= (arr.length - 2) * 2 + 2
 }
 
 function getStart() {
@@ -83,16 +78,25 @@ function oneStream(point, nums, a0, a, margin) {
   /*
     a0:[v5,v6],a:[[v1~v4]],c:[cp-af]
   */
+  const _a = a.flat().concat(a0)
+  if (_a.length !== [...new Set(_a)].length) {
+    throw new Error('bbbb')
+  }
   nums[0] -= 1
   if (nums[0] === 0) {
     a0.push(point)
+    if (isConnect(a0, (a, b) => b in points[a])) {
+
+    } else {
+      throw new Error('aaa')
+    }
     a.push(a0)
     if (nums.length === 2) {
-      const rest = getDiffArr(Object.keys(points[point]).number(), null, a.flat())
+      const all = Object.keys(points).number()
+      const rest = getDiffArr(all, null, [point, ...a.flat()])
       if (isConnect(rest, (a, b) => b in points[a])) {
         a.push(rest)
         if (equl(allArr, sortArr(a))) {
-          console.log(allArr)
           ++count
           count % 100 === 0 && console.log(count, repeat)
           return true
@@ -101,7 +105,7 @@ function oneStream(point, nums, a0, a, margin) {
     }
     else if (nums.length > 1) {//nums[4,4] 
       nums.shift()
-      margin = getDiffArr(margin, Object.keys(points).number(), [point])
+      margin = getDiffArr(margin, Object.keys(points[point]).number(), [point, ...a.flat()])
       margin.forEach(item => {
         if (oneStream(item, [...nums], [], a.map(item => [...item]), margin)) {
           return true
@@ -112,7 +116,7 @@ function oneStream(point, nums, a0, a, margin) {
     let c = Object.keys(points[point]).number() //cp
     const aFlat = a.flat().concat(a0) //a
     c = getDiffArr(c, null, aFlat)//[cp-a]\
-    margin = getDiffArr(margin, c, [point])
+    margin = getDiffArr(margin, c, [point, ...a.flat()])
     c.forEach(item => {
       if (oneStream(item, [...nums], [...a0, point], a.map(item => [...item]), margin)) {
         return true

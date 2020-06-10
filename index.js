@@ -104,7 +104,7 @@ function isConnect(arr, fn) {
         const ad = a + d === 5
         const bc = b + c === 5
         const [s, m, e] = ac || ad ? [b, a, ac ? d : c] : [a, b, bc ? d : c]
-        const isSm = s < 4
+        const isSm = s < 3
         const ss = share[isSm ? s : 5 - s]
         const der = ss.indexOf(e) - ss.indexOf(m)
         if (der === 1 || der === -4) {
@@ -155,9 +155,6 @@ function oneStream(point, nums, a0, a, margin, shape = []) {
         a.push(rest)
         shape.push(lsr)
         if (equl(allArr, sortArr(a), shape)) {
-          ++count
-          count % 10 === 0 && console.log(count, repeat)
-          count % 500 === 0 && console.log(allArr.shape)
           return true
         }
       }
@@ -234,24 +231,19 @@ function equl(allArr, a0, shape) {
   const stant = points2arrs(a0)
   const str = stant.flat().join('')
   const shapeStr = shape.sort((a, b) => a - b).join('')
-  allArr.shape[shapeStr] === undefined && (allArr.shape[shapeStr] = 0)
-  allArr.shape[shapeStr] += 1
-  if (!(str in allArr.hax)) {
-    //    console.log(str)
-    const a24 = getTWS(stant)
-    allArr.hub.push(a24)
-    a24.forEach(item => {
-      allArr.hax[getStr(item)] = a24
-    })
-    return true
-  } else {
-    repeat++
+  if (shapeStr in allArr.shape) {
     return false
+  } else {
+    const a = shapeStr.split('')
+    allArr.shape[shapeStr] = { stant, repeat: a.length - [...new Set(a)].length }
+    allArr.count++
+    allArr.count % 10 === 0 && console.log(allArr.count)
+    return true
   }
 }
 
 const points = createPoint()
-const allArr = { hax: {}, hub: [], shape: {} }
+const allArr = { count: 0, shape: {} }
 const path = []
 console.time('lb')
 //  once([],[],[4,4,4,4,4,4],2,-(-Object.keys(points)[0]),allArr,path)

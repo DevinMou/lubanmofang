@@ -56,17 +56,72 @@ function getP(Arr, num) {
   return res
 }
 
+// ['down','back','right','left','font','top']
+// 0:[1,2,4,3]:5
+// 1:[0,2,5,3]:4
+// 2:[0,4,5,1]:3
+const share = [[1, 2, 4, 3], [0, 2, 5, 3], [0, 4, 5, 1]]
+// [<,-][田,T,刁,L,Z,厶,了]
 function isConnect(arr, fn) {
-  const res = Array(arr.length).fill(0)
+  const res = Array(arr.length).fill([])
   arr.forEach((item, index) => {
     arr.slice(index).reduce((a, b, i) => {
-      const ic = fn(a, b) ? 1 : 0
-      res[index] += ic
-      res[index + i] += ic
+      const ic = fn(a, b)
+      if (ic !== null) {
+        res[index].push(ic)
+        res[index + i].push(5 - ic)
+      }
       return a
     })
   })
-  return res.reduce((a, b) => a + b) >= (arr.length - 2) * 2 + 2
+  if (arr.length === 4) {
+    let m3, m2 = [], m1 = 0
+    for (let i = 0; i < 4; i++) {
+      const item = res[i]
+      const len = item.length
+      if (len === 3) {
+        m3 = item
+        break
+      } else if (len === 2) {
+        m2.push(item)
+      } else if (len === 1) {
+        m1++
+      }
+    }
+    if (m3) {
+      return m3[0] + m3[1] === 5 || m3[0] + m3[2] === 5 || m3[1] + m3[2] === 5 ? 1 : 2
+    } else if (m2.length === 4) {
+      return 0
+    } else if (m2.length === 2 && m1 === 2) {
+      const [a, b] = m2[0]
+      const [c, d] = m2[1]
+      if (a + b === 5 || c + d === 5) {
+        return 3
+      } else if (a + b + c + d === 10) {
+        return 4
+      } else {
+        const ac = a + c === 5
+        const ad = a + d === 5
+        const bc = b + c === 5
+        const [s, m, e] = ac || ad ? [b, a, ac ? d : c] : [a, b, bc ? d : c]
+        const isSm = s < 4
+        const ss = share[isSm ? s : 5 - s]
+        const der = ss.indexOf(3) - ss.indexOf(m)
+        if (der === 1 || der === -4) {
+          return isSm ? 5 : 6
+        } else {
+          return isSm ? 6 : 5
+        }
+      }
+    } else {
+      return null
+    }
+  } else if (arr.length === 3 && arr) {
+    const m2 = arr[0].length === 2 ? arr[0] : arr[1].length === 2 ? arr[1] : arr[2].length === 2 ? arr[2] : null
+    return m2 ? (m2[0] + m2[1] === 5 ? -1 : -2) : null
+  } else {
+    return null
+  }
 }
 
 function getStart() {
@@ -74,7 +129,7 @@ function getStart() {
 }
 // v1->[c1].forEach->v2->[c2-v1]
 let count = 0
-function oneStream(point, nums, a0, a, margin) {
+function oneStream(point, nums, a0, a, margin, shape = []) {
   /*
     a0:[v5,v6],a:[[v1~v4]],c:[cp-af]
   */
@@ -85,8 +140,9 @@ function oneStream(point, nums, a0, a, margin) {
   nums[0] -= 1
   if (nums[0] === 0) {
     a0.push(point)
-    if (isConnect(a0, (a, b) => b in points[a])) {
-
+    const sr = isConnect(a0, (a, b) => b in points[a] ? points[a][b].cs : null)
+    if (sr !== null) {
+      shape.push(sr)
     } else {
       throw new Error('aaa')
     }
@@ -94,11 +150,14 @@ function oneStream(point, nums, a0, a, margin) {
     if (nums.length === 2) {
       const all = Object.keys(points).number()
       const rest = getDiffArr(all, null, [point, ...a.flat()])
-      if (isConnect(rest, (a, b) => b in points[a])) {
+      const lsr = isConnect(rest, (a, b) => b in points[a] ? points[a][b].cs : null)
+      if (lsr !== null) {
         a.push(rest)
-        if (equl(allArr, sortArr(a))) {
+        shape.push(lsr)
+        if (equl(allArr, sortArr(a), shape)) {
           ++count
-          count % 100 === 0 && console.log(count, repeat)
+          count % 10 === 0 && console.log(count, repeat)
+          count % 500 === 0 && console.log(allArr.shape)
           return true
         }
       }
@@ -107,7 +166,7 @@ function oneStream(point, nums, a0, a, margin) {
       nums.shift()
       margin = getDiffArr(margin, Object.keys(points[point]).number(), [point, ...a.flat()])
       margin.forEach(item => {
-        if (oneStream(item, [...nums], [], a.map(item => [...item]), margin)) {
+        if (oneStream(item, [...nums], [], a.map(item => [...item]), margin, [...shape])) {
           return true
         }
       })
@@ -118,7 +177,7 @@ function oneStream(point, nums, a0, a, margin) {
     c = getDiffArr(c, null, aFlat)//[cp-a]\
     margin = getDiffArr(margin, c, [point, ...a.flat()])
     c.forEach(item => {
-      if (oneStream(item, [...nums], [...a0, point], a.map(item => [...item]), margin)) {
+      if (oneStream(item, [...nums], [...a0, point], a.map(item => [...item]), margin, [...shape])) {
         return true
       }
     })
@@ -171,9 +230,12 @@ function sortArr(a0) {
   return a0.map(arr => arr.sort((a, b) => a - b)).sort((a, b) => a[0] - b[0])
 }
 let repeat = 0
-function equl(allArr, a0) {
+function equl(allArr, a0, shape) {
   const stant = points2arrs(a0)
   const str = stant.flat().join('')
+  const shapeStr = shape.sort((a, b) => a - b).join('')
+  allArr.shape[shapeStr] === undefined && (allArr.shape[shapeStr] = 0)
+  allArr.shape[shapeStr] += 1
   if (!(str in allArr.hax)) {
     //    console.log(str)
     const a24 = getTWS(stant)
@@ -189,7 +251,7 @@ function equl(allArr, a0) {
 }
 
 const points = createPoint()
-const allArr = { hax: {}, hub: [] }
+const allArr = { hax: {}, hub: [], shape: {} }
 const path = []
 console.time('lb')
 //  once([],[],[4,4,4,4,4,4],2,-(-Object.keys(points)[0]),allArr,path)

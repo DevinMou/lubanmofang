@@ -63,7 +63,7 @@ function getP(Arr, num) {
 const share = [[1, 2, 4, 3], [0, 2, 5, 3], [0, 4, 5, 1]]
 // [<,-][田,T,刁,L,Z,厶,了]
 function isConnect(arr, fn) {
-  const res = Array(arr.length).fill([])
+  const res = Array(arr.length).fill(1).map(() => [])
   arr.forEach((item, index) => {
     arr.slice(index).reduce((a, b, i) => {
       const ic = fn(a, b)
@@ -106,7 +106,7 @@ function isConnect(arr, fn) {
         const [s, m, e] = ac || ad ? [b, a, ac ? d : c] : [a, b, bc ? d : c]
         const isSm = s < 4
         const ss = share[isSm ? s : 5 - s]
-        const der = ss.indexOf(3) - ss.indexOf(m)
+        const der = ss.indexOf(e) - ss.indexOf(m)
         if (der === 1 || der === -4) {
           return isSm ? 5 : 6
         } else {
@@ -116,8 +116,8 @@ function isConnect(arr, fn) {
     } else {
       return null
     }
-  } else if (arr.length === 3 && arr) {
-    const m2 = arr[0].length === 2 ? arr[0] : arr[1].length === 2 ? arr[1] : arr[2].length === 2 ? arr[2] : null
+  } else if (arr.length === 3) {
+    const m2 = res[0].length === 2 ? res[0] : res[1].length === 2 ? res[1] : res[2].length === 2 ? res[2] : null
     return m2 ? (m2[0] + m2[1] === 5 ? -1 : -2) : null
   } else {
     return null
@@ -255,7 +255,7 @@ const allArr = { hax: {}, hub: [], shape: {} }
 const path = []
 console.time('lb')
 //  once([],[],[4,4,4,4,4,4],2,-(-Object.keys(points)[0]),allArr,path)
-// oneStream(-(-Object.keys(points)[0]), [3, 4, 4, 4, 4, 4, 4], [], [], [])
+oneStream(-(-Object.keys(points)[0]), [3, 4, 4, 4, 4, 4, 4], [], [], [])
 console.timeEnd('lb')
 
 function matrixRotate(x, y) {

@@ -357,29 +357,48 @@ function points2arrs(points) {
   }).sort((a, b) => a.join('') - b.join(''))
 }
 
-
+/*
+ stack: [[p1]]->[[],[c1...p2]]->[[],[c1...],[c2...p3]]->[[],[c1...],[c2...],[mp3...p4]]->[[],[c1],[c2],[mp3],[c4...p5]]->
+   res:      [p1]--------->[p1,p2]--------------->[p1,p2,p3]-------------------->[p1,p2,p3|p4]---------------->[p1,p2,p3|p4,p5]
+*/
 
 function Action() {
+  let count = 0
+  let startDate = new Date().getTime()
+  let nowCount = 0
   const stack = [[1001]]
-  const nums = [3, 4, 4, 4, 4, 4]
   const res = []
   const shape = []
+  const margin = new Set()
   let lastPoint
-  while (stack.length) {
-    if (stack.length < 23) {
+  let len
+  while (len = stack.length, len) {
+    if (len) {
       const l = stack.last()
       if (l.length) {
         lastPoint = l.pop()
+        if (res.includes(lastPoint)) {
+          continue
+        }
       } else {
         stack.pop()
+        res.pop()
         continue
       }
-      const c = getDiffArr(Object.keys(points[lastPoint]).number(), null, res)
-      if (c.length) {
+      const c = Object.keys(points[lastPoint]).number()
+      let cr = getDiffArr(Object.keys(points[lastPoint]).number(), null, res)
+      if (cr.length) {
         res.push(lastPoint)
         if (res.length === 23) {
           const rest = getDiffArr(Object.keys(points).number(), null, res)
           const lsr = isConnect(rest, (a, b) => b in points[a] ? points[a][b].cs : null)
+          count++
+          if (count - nowCount > 100000) {
+            const nowDate = new Date().getTime()
+            console.log(((count - nowCount) / (nowDate - startDate)).toFixed(4))
+            nowCount = count
+            startDate = nowDate
+          }
           if (lsr !== null) {
             let index = 0
             const a = []
@@ -408,11 +427,18 @@ function Action() {
           res.pop()
           continue
         }
-        stack.push(c)
+
+        if (len % 4 === 3) {
+          const set = new Set(res.map(item => Object.keys(points[item]).number()).flat())
+          cr = getDiffArr([...set], null, res)
+        }
+        stack.push(cr)
       } else {
         continue
       }
 
+    } else {
+      break
     }
   }
 }

@@ -2,6 +2,10 @@ Array.prototype.number = function () {
   return this.map(item => -(-item))
 }
 
+Array.prototype.last = function () {
+  return this[this.length - 1]
+}
+
 function createPoint() {
   const points = {}
   const er = [4, 2, 1]
@@ -247,7 +251,7 @@ const allArr = { count: 0, shape: {} }
 const path = []
 console.time('lb')
 //  once([],[],[4,4,4,4,4,4],2,-(-Object.keys(points)[0]),allArr,path)
-oneStream(-(-Object.keys(points)[0]), [3, 4, 4, 4, 4, 4, 4], [], [], [])
+// oneStream(-(-Object.keys(points)[0]), [3, 4, 4, 4, 4, 4, 4], [], [], [])
 console.timeEnd('lb')
 
 function matrixRotate(x, y) {
@@ -353,3 +357,62 @@ function points2arrs(points) {
   }).sort((a, b) => a.join('') - b.join(''))
 }
 
+
+
+function Action() {
+  const stack = [[1001]]
+  const nums = [3, 4, 4, 4, 4, 4]
+  const res = []
+  const shape = []
+  let lastPoint
+  while (stack.length) {
+    if (stack.length < 23) {
+      const l = stack.last()
+      if (l.length) {
+        lastPoint = l.pop()
+      } else {
+        stack.pop()
+        continue
+      }
+      const c = getDiffArr(Object.keys(points[lastPoint]).number(), null, res)
+      if (c.length) {
+        res.push(lastPoint)
+        if (res.length === 23) {
+          const rest = getDiffArr(Object.keys(points).number(), null, res)
+          const lsr = isConnect(rest, (a, b) => b in points[a] ? points[a][b].cs : null)
+          if (lsr !== null) {
+            let index = 0
+            const a = []
+            while (index < 23) {
+              let a0
+              if (index === 0) {
+                a0 = res.slice(0, 3)
+                index += 3
+              } else {
+                a0 = res.slice(index, index + 4)
+                index += 4
+              }
+              const sr = isConnect(a0, (a, b) => b in points[a] ? points[a][b].cs : null)
+              if (sr !== null) {
+                shape.push(sr)
+                a.push(a0)
+              } else {
+                throw new Error('aaa')
+              }
+            }
+            a.push(rest)
+            shape.push(lsr)
+            equl(allArr, sortArr(a), shape)
+            shape.length = 0
+          }
+          res.pop()
+          continue
+        }
+        stack.push(c)
+      } else {
+        continue
+      }
+
+    }
+  }
+}

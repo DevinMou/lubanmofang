@@ -228,19 +228,19 @@
       this.el = zft
       return zft
     }
-    setHideClass() {
-      this.el.className = ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
+    setHideClass(noHide) {
+      this.el.className = noHide ? 'zft' : ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
     }
     hide() {
       this.upStyle('opacity', '0')
     }
     show() {
-      this.upStyle('opacity', this.style.opacity || '1')
+      this.upStyle('opacity', this.style.opacity || '0.8')
     }
   }
 
   class Block {
-    constructor(numArr, luban, bgColor, parent) {
+    constructor(numArr, luban, bgColor, parent, noHide) {
       this.arr = [...numArr]
       this.hub = {}
       this.parent = parent
@@ -255,10 +255,10 @@
           })
         })
       })
-      this.setHideFace(bgColor)
+      this.setHideFace(bgColor, noHide)
     }
 
-    setHideFace(color) {
+    setHideFace(color, noHide) {
       for (let point in this.hub) {
         const one = this.hub[point]
         const cp = points[point]
@@ -272,7 +272,8 @@
       }
       for (let k in this.hub) {
         this.hub[k].style.background = color
-        this.hub[k].setHideClass()
+        this.hub[k].show()
+        this.hub[k].setHideClass(noHide)
       }
     }
     setStyle(style) {
@@ -368,14 +369,15 @@
       $ct.appendChild(df)
       ReactData.collection = {
         arr: [],
-        load(data, colors) {
+        load(data, colors, noHide) {
+          this.show()
           this.arr.length = 0
-          data.forEach((a, i) => this.arr.push(new Block(a, luban, colors[i] || 'white', this.arr)))
+          data.forEach((a, i) => this.arr.push(new Block(a, luban, (colors && colors[i]) || 'white', this.arr, noHide)))
         },
         show(indexs) {
           const isArr = Array.isArray(indexs)
           this.arr.forEach((item, index) => {
-            if ((isArr && isArr.includes(index)) || index === indexs) {
+            if ((isArr && indexs.includes(index)) || index === indexs) {
               item.showSelf()
             } else {
               item.hideSelf()
@@ -385,7 +387,7 @@
         hide(indexs) {
           const isArr = Array.isArray(indexs)
           this.arr.forEach((item, index) => {
-            if ((isArr && isArr.includes(index)) || index === indexs) {
+            if ((isArr && indexs.includes(index)) || index === indexs) {
               item.hideSelf()
             } else {
               item.showSelf()
@@ -404,13 +406,13 @@
           [1470, 2000, 3000],
         ] */
         [
-          [1000, 2002, 3046],
-          [1000, 2300, 3110],
-          [1000, 2400, 3620],
+          [1000, 2000, 3710],
+          [1000, 2002, 3062],
           [1001, 2001, 3001],
-          [1026, 2004, 3000],
-          [1110, 2030, 3000],
-          [1640, 2040, 3000]
+          [1036, 2000, 3000],
+          [1040, 2044, 3004],
+          [1300, 2110, 3000],
+          [1400, 2620, 3000]
         ]
 /*         [
           [1000, 2000, 3017],

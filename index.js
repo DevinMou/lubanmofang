@@ -13,15 +13,15 @@ function createPoint() {
     for (let j = 2; j >= 0; j--) {
       for (let h = 0; h < 3; h++) {
         let point = i * 1000 + er[h] * 10 ** j
-        points[point] = getEdge(i, j, er[h], points)
+        points[point] = getEdge(i, j, er[h], points, ((i - 1) * 9 + (2 - j) * 3 + h + 9).toString(36))
       }
     }
   }
   return points
 }
 
-function getEdge(floor, site, num, points) {
-  const res = {}
+function getEdge(floor, site, num, points, str) {
+  const res = Object.defineProperty({}, 'chart', { value: str })
   let floors = floor === 1 ? [2] : floor === 2 ? [1, 3] : [2]
   let sites = site === 0 ? [1] : site === 1 ? [0, 2] : [1]
   let nums = num === 4 ? [2] : num === 2 ? [4, 1] : [2]
@@ -314,7 +314,7 @@ function vertical90(arrs) {
 
 function getTW(arr) {
   const waitArr = []
-  let item = arr
+  let item = arr.map((item, index) => item < 1000 ? (item + (index + 1) * 1000) : item)
   for (let i = 0; i < 4; i++) {
     waitArr.push(item)
     if (i === 3) { break }
@@ -355,6 +355,20 @@ function points2arrs(points) {
     items.forEach(e => e < 2000 ? (item[0] += e - 1000) : e < 3000 ? (item[1] += e - 2000) : (item[2] += e - 3000))
     return item
   }).sort((a, b) => a.join('') - b.join(''))
+}
+
+function block2points(block) { //[1020, 2064, 3000]
+  const points = []
+  block.forEach((item, index) => {
+    if (item % 1000) {
+      num2bsg(item).forEach((item$, index$) => {//s:2
+        item$ && num2arr(item$).forEach((item$$, index$$) => {//[0,1,0]
+          item$$ && points.push((index + 1) * 1000 + [4, 2, 1][index$$] * 10 ** (2 - index$))
+        })
+      })
+    }
+  })
+  return points
 }
 
 /*
@@ -441,4 +455,87 @@ function Action() {
       break
     }
   }
+}
+// 4 2 1
+// [<,-][田,T,刁,L,Z,厶,マ]
+const SC = {
+  0: [[66, 0, 0], [0, 66, 0], [44, 44, 0]],
+  1: [[27, 0, 0], [72, 0, 0], [70, 20, 0], [20, 70, 0]],
+  2: [[64, 40, 0], [62, 20, 0], [46, 4, 0], [40, 64, 0], [20, 62, 0], [4, 46, 0]],
+  3: [[470, 0, 0], [74, 0, 0], [70, 40, 0], [47, 0, 0], [7, 4, 0], [40, 70, 0]],
+  4: [[630, 0, 0], [360, 0, 0], [0, 630, 0], [0, 360, 0]],
+  5: [[2, 46, 0], [4, 64, 0], [40, 62, 0], [20, 26, 0], [46, 40, 0], [64, 20, 0], [62, 2, 0], [26, 4, 0]],
+  6: [[40, 46, 0], [20, 64, 0], [2, 62, 0], [4, 26, 0], [46, 2, 0], [64, 4, 0], [62, 40, 0], [26, 20, 0]],
+}
+
+function getAllBlock() {
+  const res = {}
+  for (let k in SC) {
+    const item = SC[k]
+    res[k] = new Set()
+    item.forEach(item$ => {
+      getTW(item$).forEach(item$$ => {
+        res[k].add(block2points(item$$).map(item$3 => points[item$3].chart).sort().join(''))
+      })
+    })
+  }
+  return res
+}
+
+const startBLock = [[4, 4, 4], [20, 20, 20], [6, 4, 0], [6, 2, 0], [4, 6, 0], [4, 2, 0], [22, 2, 0], [22, 20, 0], [2, 22, 0], [20, 22, 0]].map(item => block2points(item).map(item$ => points[item$].chart).sort().join(''))
+const blockHub = Array.from({ ...getAllBlock(), length: 6 }).map(item => [...item])
+const box = [startBLock[0]]
+let xl = [0, 0, 0, 0, 0, 0]
+const lastIndex = {}
+function onceBlock(start, nums) { // [a,b,c,d,e]
+  const stack = [[start]]
+  const res = []
+  const xl = [...nums]
+  const group = new Set()
+  try {
+
+    while (stack.length) {
+      const l = stack.last()
+      if (l.length) {
+        lastBlock = l.shift()
+      } else {
+        stack.pop()
+        res.pop()
+        continue
+      }
+      let resStr = res.join('') + lastBlock
+      const num = xl[res.length]
+      let firstIndex = false
+      const tempArr = blockHub[num].filter((item, index) => {
+        /* if (index <= (lastIndex[num] || 0)) {
+          return false
+        } */
+        const ia = item.split('')
+        for (let i = 0; i < ia.length; i++) {
+          if (resStr.includes(ia[i])) {
+            return false
+          }
+        }
+        if (firstIndex === false) {
+          firstIndex = index
+        }
+        return true
+      })
+      if (tempArr.length) {
+        res.push(lastBlock)
+        stack.push(tempArr)
+        lastIndex[num] = firstIndex
+        if (res.length === 6) {
+          group.add(res[0] + (res.slice(1).concat(tempArr[0])).sort().join(''))
+          res.pop()
+          stack.pop()
+        }
+      }
+      continue
+    }
+  }
+  catch (err) {
+    console.log(err)
+  }
+  return [...group]
 }

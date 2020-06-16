@@ -8,16 +8,19 @@ Array.prototype.last = function () {
 
 function createPoint() {
   const points = {}
+  const letters = {}
   const er = [4, 2, 1]
   for (let i = 1; i < 4; i++) {
     for (let j = 2; j >= 0; j--) {
       for (let h = 0; h < 3; h++) {
         let point = i * 1000 + er[h] * 10 ** j
-        points[point] = getEdge(i, j, er[h], points, ((i - 1) * 9 + (2 - j) * 3 + h + 9).toString(36))
+        let letter = ((i - 1) * 9 + (2 - j) * 3 + h + 9).toString(36)
+        letters[letter] = point
+        points[point] = getEdge(i, j, er[h], points, letter)
       }
     }
   }
-  return points
+  return [points, letters]
 }
 
 function getEdge(floor, site, num, points, str) {
@@ -246,7 +249,7 @@ function equl(allArr, a0, shape) {
   }
 }
 
-const points = createPoint()
+const [points, letters] = createPoint()
 const allArr = { count: 0, shape: {} }
 const path = []
 console.time('lb')
@@ -483,7 +486,7 @@ function getAllBlock() {
 }
 
 const startBLock = [[4, 4, 4], [20, 20, 20], [6, 4, 0], [6, 2, 0], [4, 6, 0], [4, 2, 0], [22, 2, 0], [22, 20, 0], [2, 22, 0], [20, 22, 0]].map(item => block2points(item).map(item$ => points[item$].chart).sort().join(''))
-const blockHub = Array.from({ ...getAllBlock(), length: 6 }).map(item => [...item])
+const blockHub = Array.from({ ...getAllBlock(), length: 7 }).map(item => [...item])
 const box = [startBLock[0]]
 let xl = [0, 0, 0, 0, 0, 0]
 const lastIndex = {}
@@ -538,4 +541,58 @@ function onceBlock(start, nums) { // [a,b,c,d,e]
     console.log(err)
   }
   return [...group]
+}
+
+function letters2arrs(letterStr) {
+  let arrs = letterStr.split('').map(item => letters[item])
+  arrs = [arrs.slice(0, 3), ...arrs.slice(3).reduce((a, b, i) => (i % 4 === 0 ? a.push([b]) : a.last().push(b), a), [])]
+  return points2arrs(arrs)
+}
+
+function getRotate(letterStr) {
+  return getTWS(letters2arrs(letterStr)).map(item => {
+    let first
+    const arr = item.map(item$ => {
+      return block2points(item$).map(item$$ => points[item$$].chart).sort().join('')
+    }).filter(item$3 => item$3.length === 3 ? (first = item$3, false) : true)
+    return first + arr.sort().join('')
+  })
+}
+
+function removeRepeat(arrs) {
+  const sets = new Set(arrs)
+  const res = []
+  while (sets.size) {
+    const first = sets.keys().next().value
+    sets.delete(first)
+    getRotate(first).forEach(item => {
+      sets.delete(item)
+    })
+    res.push(first)
+  }
+  return res
+}
+
+function streamBlock(start, n) {
+  const nums = [0, 0, 0, 0, 0, 0]
+  const res = {}
+  while (1) {
+    const bs = onceBlock(start, nums)
+    if (bs.length) {
+      res[n + nums.sort((a, b) => a - b).join('')] = removeRepeat(bs)
+    }
+    if (nums.join('') === '666666') {
+      break
+    }
+    for (let i = 5; i >= 0; i--) {
+      if (nums[i] !== 6) {
+        nums[i] += 1
+        for (let j = i + 1; j < 6; j++) {
+          nums[j] = nums[i]
+        }
+        break
+      }
+    }
+  }
+  return res
 }

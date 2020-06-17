@@ -16,12 +16,21 @@
       top: 0;
       font-size: 0;
       left: 0;
-      margin: 10%;
       background: transparent;
-      width: 80%;
-      height: 80%;
+      width: 70%;
+      height: 100%;
       perspective-origin: center;
       transform: rotateX(75deg) rotateZ(-20deg);
+    }
+
+    .fixed {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 30%;
+      height: 100%;
+      z-index: 1;
+      background: #eeeeee;
     }
 
     .background-board {
@@ -109,6 +118,8 @@
     <div class="background-board"></div>
     <div class="container"></div>
   </div>
+  <div class="fixed">
+  </div>
 </body>
 <script src="./index.js"></script>
 <script>
@@ -140,7 +151,7 @@
     }
   })
   class One {
-    constructor(parentNode, site) {
+    constructor(parentNode, site = [0, 0, 0]) {
       const _this = this
       _this.site = [...site]
       _this.hideFace = {}
@@ -306,24 +317,31 @@
       })
     }
   }
+
+  class Bulk {
+    constructor() {
+
+    }
+  }
+
+  function createBlocks(arrs) {
+
+  }
+
   function ready(fn) {
     document.addEventListener('DOMContentLoaded', function readyFn() {
       document.removeEventListener('DOMContentLoaded', readyFn, false)
       fn()
     }, false)
   }
-  ready(function () {
-    function createBlock(arr) { // [1000, 2000, 3644]
-      const group = document.createElement('div')
-      arr.forEach((item, index) => {
 
-      })
-    }
+  ready(function () {
     ReactData.$body = document.body
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
-    const { $body, $pb, $ct } = ReactData
+    ReactData.$fixed = document.querySelector('.fixed')
+    const { $body, $pb, $ct, $fixed } = ReactData
     let r = 1
     let startPos = null
     let posRotate = [75, -20]
@@ -350,10 +368,6 @@
 
       const luban = []
 
-      function package(arr) { // [x7]
-        return arr.map(item => new Block(item, luban))
-      }
-
       const df = document.createDocumentFragment()
       for (let f = 2; f >= 0; f--) {
         luban[f] = luban[f] || []
@@ -367,6 +381,26 @@
         }
       }
       $ct.appendChild(df)
+
+      // 创建操作区
+      function createOperationBlocks(num, blocks) {
+        const ob = document.createElement('div')
+        ob.className = 'operation-blocks'
+        for (let i = 0; i < num; i++) {
+          blocks[i] = new One(ob)
+        }
+        return ob
+      }
+      const odf = document.createDocumentFragment()
+      const operationBlocks = [[]]
+      odf.appendChild(createOperationBlocks(3, operationBlocks[0]))
+      for (let i = 1; i < 7; i++) {
+        operationBlocks[i] = []
+        odf.appendChild(createOperationBlocks(4, operationBlocks[i]))
+      }
+
+      $fixed.appendChild(odf)
+
       ReactData.collection = {
         arr: [],
         load(data, colors, noHide) {

@@ -462,6 +462,8 @@ function Action() {
 // 4 2 1
 // [<,-][田,T,刁,L,Z,厶,マ]
 const SC = {
+  '-2': [[6, 4, 0], [6, 2, 0], [4, 6, 0], [4, 2, 0], [22, 2, 0], [22, 20, 0], [2, 22, 0], [20, 22, 0]],
+  '-1': [[4, 4, 4], [20, 20, 20]],
   0: [[66, 0, 0], [0, 66, 0], [44, 44, 0]],
   1: [[27, 0, 0], [72, 0, 0], [70, 20, 0], [20, 70, 0]],
   2: [[64, 40, 0], [62, 20, 0], [46, 4, 0], [40, 64, 0], [20, 62, 0], [4, 46, 0]],
@@ -485,7 +487,7 @@ function getAllBlock() {
   return res
 }
 
-const startBLock = [[4, 4, 4], [20, 20, 20], [6, 4, 0], [6, 2, 0], [4, 6, 0], [4, 2, 0], [22, 2, 0], [22, 20, 0], [2, 22, 0], [20, 22, 0]].map(item => block2points(item).map(item$ => points[item$].chart).sort().join(''))
+const startBLock = [...SC['-1'], ...SC['-2']].map(item => block2points(item).map(item$ => points[item$].chart).sort().join(''))
 const blockHub = Array.from({ ...getAllBlock(), length: 7 }).map(item => [...item])
 const box = [startBLock[0]]
 let xl = [0, 0, 0, 0, 0, 0]

@@ -318,14 +318,59 @@
     }
   }
 
+  // [<,-][田,T,刁,L,Z,厶,マ]
+  const bulks = {
+    '-2': {
+      points: [1040, 1002, 1004],
+      offset: [0.5, 0.5, -1]
+    },
+    '-1': {
+      points: [1004, 2004, 3004],
+      offset: [1, 1, 0]
+    },
+    0: {
+      points: [1040, 1020, 1004, 1002],
+      offset: [0.5, 0.5, -1]
+    },
+    1: {
+      points: [1020, 1004, 1002, 1001],
+      offset: [0, 0.5, -1]
+    },
+    2: {
+      points: [1040, 1020, 1004, 2040],
+      offset: [0.5, 0.5, -0.5]
+    },
+    3: {
+      points: [1040, 1004, 1002, 1001],
+      offset: [0, 0.5, -1]
+    },
+    4: {
+      points: [1040, 1020, 1002, 1001],
+      offset: [0, 0.5, -1]
+    },
+    5: {
+      points: [1040, 1020, 1004, 2020],
+      offset: [0.5, 0.5, -0.5]
+    },
+    6: {
+      points: [1040, 1020, 1004, 2004],
+      offset: [0.5, 0.5, -0.5]
+    }
+  }
   class Bulk {
-    constructor() {
+    constructor(arr) {
+      this.hub = arr
+    }
+    load(id) { // 
 
     }
   }
 
-  function createBlocks(arrs) {
-
+  function createBlocks(str) {//-1123456
+    str += ''
+    const arr = str.split('')
+    const b3 = -arr[1]
+    const b4s = str.slice
   }
 
   function ready(fn) {

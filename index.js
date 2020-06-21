@@ -6,6 +6,10 @@ Array.prototype.last = function () {
   return this[this.length - 1]
 }
 
+Array.prototype.numSort = function () {
+  return this.sort((a, b) => a - b)
+}
+
 function createPoint() {
   const points = {}
   const letters = {}
@@ -270,6 +274,16 @@ function num2arr(num) {
   res[0] = num > 3 ? (num -= 4, 1) : 0
   res[1] = num === 2 ? 1 : 0
   return res
+}
+
+function point2site(point) { // 1020
+  const arr = point.toString().split('')
+  const a = 3 - arr[0]
+  let i = 1
+  while (arr[i] === '0') { i++ }
+  const b = i - 1
+  const c = ['4', '2', '1'].indexOf(arr[i])
+  return [a, b, c]
 }
 
 function arr2num(arr) {

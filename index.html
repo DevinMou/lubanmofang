@@ -150,11 +150,12 @@
       return true
     }
   })
-  class One {
-    constructor(parentNode, site = [0, 0, 0]) {
+  class SmallCube {
+    constructor(parentNode, site = [0, 0, 0], size = ReactData.size) {
       const _this = this
       _this.site = [...site]
       _this.hideFace = {}
+      _this.size = size
       parentNode.appendChild(_this.createEl())
       _this.style = new Proxy({}, {
         set(target, propKey, value) {
@@ -170,6 +171,20 @@
           delete target[propKey]
           _this.upStyle(propKey)
           return true
+        }
+      })
+      return new Proxy(this, {
+        set(target, propKey, value) {
+          if (propKey === 'site') {
+            target.site = value
+            target.el.style = target.styleobj2str()
+            return true
+          } else {
+            return Reflect.set(target, propKey, value)
+          }
+        },
+        get(target, propKey) {
+          return Reflect.get(target, propKey)
         }
       })
     }
@@ -195,8 +210,8 @@
     }
     styleobj2str(obj) {
       obj = obj || {}
-      obj.width = obj.width || ReactData.size
-      obj.height = obj.height || ReactData.size
+      obj.width = obj.width || this.size
+      obj.height = obj.height || this.size
       obj.transform = obj.transform || { translate: [] }
       for (let name in obj) {
         const value = obj[name]
@@ -229,12 +244,22 @@
       }
       return Object.keys(obj).map(key => `${key}:${obj[key]}`).join(';')
     }
+    changeSize(size) {
+      if (size !== this.size) {
+        this.size = size
+        this.el.children[5].style.transform = `translateZ(${this.size}px)`
+      }
+    }
     createEl() {
       const zft = document.createElement('div')
       zft.className = 'zft'
       zft.style = this.styleobj2str()
       for (let i = 0; i < 6; i++) {
-        zft.appendChild(document.createElement('span'))
+        const span = document.createElement('span')
+        if (i === 5) {
+          span.style.transform = `translateZ(${this.size}px)`
+        }
+        zft.appendChild(span)
       }
       this.el = zft
       return zft
@@ -251,12 +276,11 @@
   }
 
   class Block {
-    constructor(numArr, luban, bgColor, parent, noHide) {
-      this.arr = [...numArr]
+    constructor(cubes, parent) {
       this.hub = {}
+      this.cubes = cubes
       this.parent = parent
-      this.bgColor = bgColor
-      numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
+      /* numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
         a.forEach((b, bi) => {
           b.forEach((c, ci) => {
             if (c) {
@@ -265,10 +289,24 @@
             }
           })
         })
-      })
+      }) */
+      //this.setHideFace(bgColor, noHide)
+    }
+    init(numArr, bgColor, noHide) {
+      this.setSite(numArr)
+      this.setColor(bgColor)
       this.setHideFace(bgColor, noHide)
     }
-
+    setSite(numArr) {
+      numArr.numSort().forEach((item, index) => {
+        const cube = this.cubes[index]
+        this.hub[item] = cube
+        cube.site = point2site(item)
+      })
+    }
+    setColor(color) {
+      this.bgColor = color
+    }
     setHideFace(color, noHide) {
       for (let point in this.hub) {
         const one = this.hub[point]
@@ -310,6 +348,58 @@
     hideOther() {
       this.parent.forEach(item => {
         if (item !== this) {
+          item.hideSelf()
+        } else {
+          item.showSelf()
+        }
+      })
+    }
+  }
+
+  class ACB { // assemble cube
+    constructor(isWhole, el, size) {// num = 27|4|3
+      const blocks = [[]]
+      this.blocks = []
+      const df = document.createDocumentFragment()
+      for (let i = 0; i < (isWhole ? 27 : 4); i++) {
+        const item = new SmallCube(df)
+        if (isWhole) {
+          if (i % 4 === 3) {
+            blocks.push([item])
+          } else {
+            blocks.last().push(item)
+          }
+        } else {
+          blocks[0].push(item)
+        }
+      }
+      blocks.forEach(item => {
+        this.blocks.push(new Block(item, this.blocks))
+      })
+      el.appendChild(df)
+    }
+    load(data, colors, noHide) {
+      this.show()
+      let p3
+      const res = data.map(item => block2points(item)).filter(item => item.length === 3 ? (p3 = item, false) : true);
+      ([p3, ...res]).forEach((item, index) => {
+        this.blocks[index].init(item, (colors && colors[index]) || 'transparent', noHide)
+      })
+    }
+    show(indexs) {
+      const isArr = Array.isArray(indexs)
+      this.blocks.forEach((item, index) => {
+        if ((isArr && indexs.includes(index)) || index === indexs) {
+          item.showSelf()
+        } else {
+          item.hideSelf()
+        }
+      })
+    }
+    hide(indexs) {
+      const isArr = Array.isArray(indexs)
+      this.blocks.forEach((item, index) => {
+        if ((isArr && indexs.includes(index)) || index === indexs) {
           item.hideSelf()
         } else {
           item.showSelf()
@@ -380,6 +470,17 @@
     }, false)
   }
 
+  class TouchEvent {
+    constructor($body) {
+      $body.ontouchstart = this.startHandle
+      $body.ontouchend = this.endHandle
+    }
+    register() { }
+    startHandle() { }
+    endHandle() { }
+    moveHandle() { }
+  }
+
   ready(function () {
     ReactData.$body = document.body
     ReactData.$pb = document.querySelector('.perspective')
@@ -390,21 +491,25 @@
     let r = 1
     let startPos = null
     let posRotate = [75, -20]
+
     if ($pb) {
       function mouseMove(event) {
+        console.log(395, event)
         if (event.buttons !== 1) {
-          $body.onmousemove = null
+          $body.ontouchmove = null
         } else {
           let dx = event.pageX - startPos[0]
           let dy = event.pageY - startPos[1]
           $pb.style.transform = `rotateX(${posRotate[0] - dy * r}deg) rotateZ(${posRotate[1] - dx * r}deg)`
         }
       }
-      $body.onmousedown = function (event) {
+      $body.ontouchstart = function (event) {
+        console.log(405, event)
         startPos = [event.pageX, event.pageY]
-        $body.onmousemove = mouseMove
+        $body.ontouchmove = mouseMove
       }
-      $body.onmouseup = function (event) {
+      $body.ontouchend = function (event) {
+        console.log(410, event)
         posRotate[1] -= event.pageX - startPos[0]
         posRotate[0] -= event.pageY - startPos[1]
         startPos = null
@@ -413,7 +518,7 @@
 
       const luban = []
 
-      const df = document.createDocumentFragment()
+      /* const df = document.createDocumentFragment()
       for (let f = 2; f >= 0; f--) {
         luban[f] = luban[f] || []
         let floor = luban[f]
@@ -421,18 +526,29 @@
           floor[r] = floor[r] || []
           let row = floor[r]
           for (let c = 0; c < 3; c++) {
-            row[c] = new One(df, [f, r, c])
+            row[c] = new SmallCube(df, [f, r, c])
           }
         }
       }
-      $ct.appendChild(df)
+      $ct.appendChild(df) */
 
+      const exhibit = new ACB(true, $ct, 60)
+      exhibit.load([
+        [1000, 2000, 3170],
+        [1000, 2011, 3003],
+        [1000, 2320, 3200],
+        [1004, 2004, 3004],
+        [1013, 2002, 3000],
+        [1040, 2440, 3400],
+        [1720, 2000, 3000]
+      ], ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'])
+      window.$ehb = exhibit
       // 创建操作区
-      function createOperationBlocks(num, blocks) {
+      /* function createOperationBlocks(num, blocks) {
         const ob = document.createElement('div')
         ob.className = 'operation-blocks'
         for (let i = 0; i < num; i++) {
-          blocks[i] = new One(ob)
+          blocks[i] = new SmallCube(ob)
         }
         return ob
       }
@@ -444,9 +560,9 @@
         odf.appendChild(createOperationBlocks(4, operationBlocks[i]))
       }
 
-      $fixed.appendChild(odf)
+      $fixed.appendChild(odf) */
 
-      ReactData.collection = {
+      /* ReactData.collection = {
         arr: [],
         load(data, colors, noHide) {
           this.show()
@@ -473,56 +589,7 @@
             }
           })
         },
-      }
-      ReactData.collection.load(
-        /* [
-          [1000, 2000, 3223],
-          [1000, 2047, 3000],
-          [1000, 2110, 3110],
-          [1000, 2400, 3444],
-          [1007, 2000, 3000],
-          [1300, 2220, 3000],
-          [1470, 2000, 3000],
-        ] */
-        [
-          [1000, 2000, 3170],
-          [1000, 2011, 3003],
-          [1000, 2320, 3200],
-          [1004, 2004, 3004],
-          [1013, 2002, 3000],
-          [1040, 2440, 3400],
-          [1720, 2000, 3000]
-        ]
-/*         [
-          [1000, 2000, 3017],
-          [1000, 2017, 3000],
-          [1000, 2200, 3640],
-          [1000, 2460, 3020],
-          [1000, 2660, 3000],
-          [1007, 2000, 3000],
-          [1110, 2100, 3100]
-        ] */
-        /* points2arrs([
-          [1001, 1002, 1004],
-          [1010, 1020, 1040, 1400],
-          [1100, 1200, 2020, 2200],
-          [2001, 2002, 2004, 2040],
-          [2010, 2100, 3010, 3100],
-          [2400, 3004, 3040, 3400],
-          [3001, 3002, 3020, 3200]
-        ]) */, ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple']
-      )
-      let timer
-      let n = null
-      function hd() {
-        timer = setTimeout(() => {
-          ReactData.collection.show(n)
-          n = n === 6 ? 0 : (n + 1)
-          hd()
-        }, 1500)
-      }
-      // hd()
-      window.$luban = ReactData.collection
+      } */
     }
   })
 </script>

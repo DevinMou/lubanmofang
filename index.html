@@ -265,6 +265,8 @@
     createEl() {
       const zft = document.createElement('div')
       zft.className = 'zft'
+      const [f, r, c] = this.site
+      zft.dataset.id = (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r)
       zft.style = this.styleobj2str()
       for (let i = 0; i < 6; i++) {
         const span = document.createElement('span')
@@ -275,6 +277,9 @@
       }
       this.el = zft
       return zft
+    }
+    setGrid(arr) {//[2001,...]
+
     }
     setHideClass(noHide) {
       this.el.className = noHide ? 'zft' : ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')

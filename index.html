@@ -484,13 +484,51 @@
 
   class TouchEvent {
     constructor($body) {
+      this.hub = new WeakMap()
+      this.activeEvents = null
+      this.isDown = false
+      this.isMove = false
+      this.startDate = null
+      this.endDate = null
+      this.startPos = null
+      this.$body = $body
       $body.ontouchstart = this.startHandle
       $body.ontouchend = this.endHandle
     }
-    register() { }
-    startHandle() { }
-    endHandle() { }
-    moveHandle() { }
+    register({ el, start, end, move }) {
+      this.hub.set(el, {
+        start: start ? start.bind(this) : null,
+        end: end ? end.bind(this) : null,
+        move: move ? move.bind(this) : null
+      })
+    }
+    startHandle(event) {
+      let events
+      let target = event.target
+      while (!0) {
+        if (this.hub.has(target)) {
+          events = this.hub.get(target)
+          break
+        } else if (target === document.body) {
+          break
+        } else {
+          target = target.parentNode
+        }
+      }
+      if (events && events.start) {
+        this.isDown = false
+        this.startDate = new Date().getTime()
+        this.activeEvents = events
+        events.start(event)
+        this.$body.ontouchmove = this.moveHandle
+      }
+    }
+    endHandle(event) {
+      if (this.activeEvents && this.activeEvents.end) {
+
+      }
+    }
+    moveHandle(event) { }
   }
 
   ready(function () {

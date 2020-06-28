@@ -7,6 +7,7 @@
       width: 100%;
       height: 100%;
       margin: 0;
+      touch-action: none;
     }
 
     .perspective {
@@ -104,6 +105,18 @@
     .zft.h6 span:nth-child(6) {
       background: transparent !important;
     }
+
+    .zft span:nth-child(1) {
+      border-right: 1px dashed #ffffff;
+    }
+
+    .zft span:nth-child(3) {
+      border-bottom: 1px dashed #ffffff;
+    }
+
+    .zft span:nth-child(5) {
+      border-top: 1px dashed #ffffff;
+    }
   </style>
   <style id="var-style">
     .background-board {
@@ -200,6 +213,10 @@
         }
       })
     }
+    getSiteStr() {
+      const [f, r, c] = this.site
+      return (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r)
+    }
     upStyle(key, value) {
       const childrenStyle = ['background', 'opacity']
       if (value !== void 0) {
@@ -278,7 +295,9 @@
       this.el = zft
       return zft
     }
-    setGrid(arr) {//[2001,...]
+    setGrid(arr, color) {//[2001,...]
+      const siteStr = this.getSiteStr()
+      const point = points[siteStr]
 
     }
     setHideClass(noHide) {
@@ -488,52 +507,97 @@
   }
 
   class TouchEvent {
+    static STATUS_DOWN = 0
+    static STATUS_MOVE = 1
+    static COMBO_DELAY = 500
     constructor($body) {
       this.hub = new WeakMap()
-      this.activeEvents = null
-      this.isDown = false
-      this.isMove = false
-      this.startDate = null
-      this.endDate = null
-      this.startPos = null
+      this.touches = {}
       this.$body = $body
-      $body.ontouchstart = this.startHandle
-      $body.ontouchend = this.endHandle
+      $body.ontouchstart = this.startHandle.bind(this)
+      $body.ontouchend = this.endHandle.bind(this)
     }
-    register({ el, start, end, move }) {
-      this.hub.set(el, {
-        start: start ? start.bind(this) : null,
-        end: end ? end.bind(this) : null,
-        move: move ? move.bind(this) : null
-      })
+    register({ el, start, end, move, click }) {
+      this.hub.set(el, { start, move, end, click, combo: 0, lastDate: null })
     }
     startHandle(event) {
-      let events
-      let target = event.target
-      while (!0) {
-        if (this.hub.has(target)) {
-          events = this.hub.get(target)
-          break
-        } else if (target === document.body) {
-          break
-        } else {
-          target = target.parentNode
+      // event.preventDefault()
+      event.stopPropagation()
+      const nowDate = new Date().getTime()
+      Array.prototype.forEach.call(event.changedTouches, item => {
+        const { pageX, pageY, identifier, target } = item
+        if (!this.touches[identifier]) {
+          let events
+          let _target = target
+          while (!0) {
+            if (this.hub.has(_target)) {
+              events = this.hub.get(_target)
+              break
+            } else if (_target === document.body) {
+              break
+            } else {
+              _target = _target.parentNode
+            }
+          }
+          if (events) {
+            const touch = { pageX: null, pageY: null, status: this.STATUS_DOWN, events, startDate: new Date().getTime() }
+            if (!touch.events.lastDate || nowDate - touch.events.lastDate >= this.COMBO_DELAY) {
+              touch.events.combo = 0
+              touch.events.lastDate = null
+            } else {
+              touch.events.lastDate = nowDate
+            }
+            this.touches[identifier] = touch
+            if (events.start) {
+              events.start.bind(touch)()
+            }
+            !this.$body.ontouchmove && (this.$body.ontouchmove = this.moveHandle.bind(this))
+          }
         }
-      }
-      if (events && events.start) {
-        this.isDown = false
-        this.startDate = new Date().getTime()
-        this.activeEvents = events
-        events.start(event)
-        this.$body.ontouchmove = this.moveHandle
-      }
+      })
+    }
+    moveHandle(event) {
+      // event.preventDefault()
+      event.stopPropagation()
+      Array.prototype.forEach.call(event.changedTouches, item => {
+        const { pageX, pageY, identifier } = item
+        const touch = this.touches[identifier]
+        if (!touch) {
+          return
+        }
+        touch.status = this.STATUS_MOVE
+        if (touch.events.move && touch.pageX !== null) {
+          touch.events.move.bind(touch)(pageX, pageY)
+        }
+        touch.pageX = pageX
+        touch.pageY = pageY
+      })
     }
     endHandle(event) {
-      if (this.activeEvents && this.activeEvents.end) {
-
-      }
+      event.preventDefault()
+      event.stopPropagation()
+      const nowDate = new Date().getTime()
+      Array.prototype.forEach.call(event.changedTouches, item => {
+        const { pageX, pageY, identifier } = item
+        const touch = this.touches[identifier]
+        if (!touch) {
+          return
+        }
+        if (touch.status === this.STATUS_MOVE || nowDate - touch.events.lastDate >= this.COMBO_DELAY) {
+          touch.events.combo = 0
+          touch.events.lastDate = null
+        } else {
+          touch.events.combo += 1
+          touch.events.lastDate = nowDate
+        }
+        if (touch.status === this.STATUS_DOWN && touch.events.combo === 1 && touch.events.click) {
+          touch.events.click.bind(touch)()
+        } else if (touch.events.end) {
+          touch.events.end.bind(touch)(pageX, pageY)
+        }
+        delete this.touches[identifier]
+      })
     }
-    moveHandle(event) { }
   }
 
   ready(function () {
@@ -548,7 +612,16 @@
     let posRotate = [75, -20]
 
     if ($pb) {
-      function mouseMove(event) {
+      const touch = new TouchEvent($body)
+      touch.register({
+        el: $pb,
+        move(pageX, pageY) {
+          posRotate[1] -= ((pageX - this.pageX) * r).toFixed(2)
+          posRotate[0] -= ((pageY - this.pageY) * r).toFixed(2)
+          $pb.style.transform = `rotateX(${posRotate[0]}deg) rotateZ(${posRotate[1]}deg)`
+        }
+      })
+      /* function mouseMove(event) {
         console.log(395, event)
         if (event.buttons !== 1) {
           $body.ontouchmove = null
@@ -569,7 +642,7 @@
         posRotate[0] -= event.pageY - startPos[1]
         startPos = null
         $body.onmousemove = null
-      }
+      } */
 
       const shadow = {
         hub: {},
@@ -597,7 +670,7 @@
       }
       $ct.children[1].appendChild(df)
       shadow.init()
-      const exhibit = new ACB(true, $ct.children[0], 60)
+      /* const exhibit = new ACB(true, $ct.children[0], 60)
       exhibit.load([
         [1000, 2000, 3170],
         [1000, 2011, 3003],
@@ -607,7 +680,7 @@
         [1040, 2440, 3400],
         [1720, 2000, 3000]
       ], ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'])
-      window.$ehb = exhibit
+      window.$ehb = exhibit */
 
 
 

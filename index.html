@@ -84,6 +84,7 @@
       width: 100%;
       height: 100%;
       position: absolute;
+      box-sizing: border-box;
       top: 0;
       left: 0;
       transform-origin: 0% 0%;
@@ -116,15 +117,15 @@
     }
 
     .zft span:nth-child(1) {
-      border-right: 1px dashed #ffffff;
+      border-right: 2px dashed #ffffff;
     }
 
     .zft span:nth-child(3) {
-      border-bottom: 1px dashed #ffffff;
+      border-bottom: 2px dashed #ffffff;
     }
 
     .zft span:nth-child(5) {
-      border-top: 1px dashed #ffffff;
+      border-top: 2px dashed #ffffff;
     }
   </style>
   <style id="var-style">
@@ -309,7 +310,7 @@
     setGrid(arr, color) {//[2001,...]
       const siteStr = this.getSiteStr()
       const point = points[siteStr]
-
+      const edges = Object.value(point).map(item => item.cs)
     }
     setHideClass(noHide) {
       this.el.className = noHide ? 'zft' : ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
@@ -539,7 +540,6 @@
       const nowDate = new Date().getTime()
       Array.prototype.forEach.call(event.changedTouches, item => {
         const { pageX, pageY, identifier, target } = item
-        console.log('start:', identifier, this.touches, target)
         if (!this.touches[identifier]) {
           let events
           let _target = target

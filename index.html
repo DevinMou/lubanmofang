@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <!-- <meta name="full-screen" content="yes" />
+  <meta name="x5-fullscreen" content="yes" />
+  <meta name="browsermode" content="application" />
+  <meta name="x5-page-mode" content="app" /> -->
+
   <style id="app-style">
     html,
     body {
@@ -107,6 +115,7 @@
       transform: translateY(100%) rotateX(90deg);
     }
 
+    /*[down:b,r,back:t,r,right:b,r,left:t,l,front:b,l,top:t,l]*/
     .zft.h1 span:nth-child(1),
     .zft.h2 span:nth-child(2),
     .zft.h3 span:nth-child(3),
@@ -116,16 +125,41 @@
       background: transparent !important;
     }
 
-    .zft span:nth-child(1) {
-      border-right: 2px dashed #ffffff;
+    .zft.grid span {
+      border: 2px dashed #ffffff;
     }
 
-    .zft span:nth-child(3) {
-      border-bottom: 2px dashed #ffffff;
+    .zft.gird.g0 span:nth-child(1) {
+      background: transparent !important;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
     }
 
-    .zft span:nth-child(5) {
-      border-top: 2px dashed #ffffff;
+    .zft.gird.g1 span:nth-child(2) {
+      border-right-color: transparent;
+      border-top-color: transparent;
+    }
+
+    .zft.gird.g2 span:nth-child(3) {
+      background: transparent !important;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .zft.gird.g3 span:nth-child(4) {
+      background: transparent !important;
+      border-left-color: transparent;
+      border-top-color: transparent;
+    }
+
+    .zft.gird.g4 span:nth-child(5) {
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .zft.gird.g5 span:nth-child(6) {
+      border-left-color: transparent;
+      border-top-color: transparent;
     }
   </style>
   <style id="var-style">
@@ -310,7 +344,8 @@
     setGrid(arr, color) {//[2001,...]
       const siteStr = this.getSiteStr()
       const point = points[siteStr]
-      const edges = Object.value(point).map(item => item.cs)
+      const edges = Object.values(point).map(item => 'g' + item.cs)
+      this.el.className = ['zft', 'grid', ...edges].join(' ')
     }
     setHideClass(noHide) {
       this.el.className = noHide ? 'zft' : ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
@@ -617,6 +652,18 @@
   }
 
   ready(function () {
+    if (document.fullscreenEnabled || document.mozFullScreenEnabled) {
+      const a = document.createElement('a')
+      const event = new MouseEvent('click')
+      a.onclick = function () {
+        document.body.requestFullscreen().then(() => {
+          console.log('rfs:ok')
+        }).catch(err => console.log(err))
+        console.log(1111)
+      }
+      a.dispatchEvent(event)
+
+    }
     ReactData.$body = document.body
     ReactData.$main = document.querySelector('.main')
     ReactData.$pb = document.querySelector('.perspective')
@@ -673,7 +720,11 @@
           for (k in this.hub) {
             this.rested.push(k)
             this.hub[k].style.background = '#4cbbf380'
+            // this.hub[k].style.background = 'transparent'
           }
+        },
+        render() {
+          this.rested.forEach(item => this.hub[item].setGrid(this.rested))
         }
       }
       const df = document.createDocumentFragment()
@@ -685,8 +736,10 @@
           }
         }
       }
+      // shadow.hub['3001'] = new SmallCube(df, [0, 2, 2])
       $ct.children[1].appendChild(df)
       shadow.init()
+      shadow.render()
       /* const exhibit = new ACB(true, $ct.children[0], 60)
       exhibit.load([
         [1000, 2000, 3170],

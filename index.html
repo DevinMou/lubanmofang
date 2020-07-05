@@ -52,6 +52,49 @@
       background: #eeeeee;
     }
 
+    .fixed .swiper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .fixed .swiper>div {
+      position: absolute;
+      width: 30vw;
+      height: 30vw;
+      left: 0;
+      transform-origin: center;
+      top: calc(50vh - 15vw);
+    }
+
+    .fixed .swiper>div:nth-child(1) {
+      background: red;
+    }
+
+    .fixed .swiper>div:nth-child(2) {
+      background: orange;
+    }
+
+    .fixed .swiper>div:nth-child(3) {
+      background: yellow;
+    }
+
+    .fixed .swiper>div:nth-child(4) {
+      background: green;
+    }
+
+    .fixed .swiper>div:nth-child(5) {
+      background: cyan;
+    }
+
+    .fixed .swiper>div:nth-child(6) {
+      background: blue;
+    }
+
+    .fixed .swiper>div:nth-child(7) {
+      background: purple;
+    }
+
     .background-board {
       position: absolute;
       left: 0;
@@ -221,6 +264,15 @@
     </div>
   </div>
   <div class="fixed">
+    <div class="swiper">
+      <div>A</div>
+      <div>B</div>
+      <div>C</div>
+      <div>D</div>
+      <div>E</div>
+      <div>F</div>
+      <div>G</div>
+    </div>
   </div>
 </body>
 <script src="./index.js"></script>
@@ -471,21 +523,13 @@
   }
 
   class ACB { // assemble cube
-    constructor(isWhole, el, size) {// num = 27|4|3
+    constructor(el, size) {// num = 27|4|3
       const blocks = [[]]
       this.blocks = []
       const df = document.createDocumentFragment()
-      for (let i = 0; i < (isWhole ? 27 : 4); i++) {
+      for (let i = 0; i < 4; i++) {
         const item = new SmallCube(df)
-        if (isWhole) {
-          if (i % 4 === 3) {
-            blocks.push([item])
-          } else {
-            blocks.last().push(item)
-          }
-        } else {
-          blocks[0].push(item)
-        }
+        blocks[0].push(item)
       }
       blocks.forEach(item => {
         this.blocks.push(new Block(item, this.blocks))
@@ -760,28 +804,87 @@
           $pb.style.transform = `rotateX(${posRotate[0]}deg) rotateZ(${posRotate[1]}deg)`
         }
       })
-      /* function mouseMove(event) {
-        console.log(395, event)
-        if (event.buttons !== 1) {
-          $body.ontouchmove = null
-        } else {
-          let dx = event.pageX - startPos[0]
-          let dy = event.pageY - startPos[1]
-          $pb.style.transform = `rotateX(${posRotate[0] - dy * r}deg) rotateZ(${posRotate[1] - dx * r}deg)`
-        }
+
+      const swipers = document.querySelectorAll('.swiper')
+      const $height = document.documentElement.offsetHeight
+      const $width = document.documentElement.offsetWidth
+      const fixWidth = $width * 0.3 //a
+      const baseHeight = ($height - fixWidth) / 2
+      const baseWidth = baseHeight < fixWidth ? baseHeight : fixWidth * 0.6 //b
+      let distance = 0
+      if (swipers) {
+        Array.prototype.forEach.call(swipers, $swiper => {
+          function setTranslate() {
+            const isDown = distance > 0
+            const len = children.length
+            const baseIndex = len / 2 | 0
+            const indexDelta = distance / baseWidth | 0
+            const offset = distance % baseWidth //c
+            const offsetBase = (fixWidth - baseWidth) / 2
+            const rate = fixWidth * offset / baseWidth
+            distance = offset
+            if (indexDelta) {
+              if (indexDelta > 0) {
+                children.splice(0, 0, ...children.splice(len - indexDelta, indexDelta))
+              } else {
+                children.splice(len, 0, ...children.splice(0, -indexDelta))
+              }
+            }
+            children.forEach((item, index) => {
+              const baseTop = (index - baseIndex) * baseWidth + (index < baseIndex ? -offsetBase : offsetBase)
+              if (isDown) {
+                if (index === baseIndex - 1) {
+                  const $scale = (baseWidth - offset + rate) / fixWidth
+                  item.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
+                } else if (index === baseIndex) {
+                  const $scale = (fixWidth + offset - rate) / fixWidth
+                  item.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
+                } else {
+                  const $scale = baseWidth / fixWidth
+                  item.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
+                }
+              } else {
+                if (index === baseIndex + 1) {
+                  const $scale = (baseWidth + offset - rate) / fixWidth
+                  item.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
+                } else if (index === baseIndex) {
+                  const $scale = (fixWidth - offset + rate) / fixWidth
+                  item.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
+                } else {
+                  const $scale = baseWidth / fixWidth
+                  item.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
+                }
+              }
+            })
+          }
+          function animation(len, fn, time, v, a = 0) {
+            function dx(dt) {
+              return dt ** 2 * a / 2 + (2 * a * len + v ** 2) * 0.5 * dt
+            }
+            window.requestAnimationFrame()
+          }
+          const children = Array.from($swiper.children)
+          setTranslate()
+          touch.register({
+            el: $swiper,
+            move(pageX, pageY) {
+              distance += (pageY - this.pageY) * baseWidth * 2 / $height
+              setTranslate()
+            },
+            end() {
+              if (distance > 0) {
+                if (distance > baseWidth / 2) {
+
+                } else {
+
+                }
+              } else if (distance < 0) {
+
+              }
+            }
+          })
+        })
       }
-      $body.ontouchstart = function (event) {
-        console.log(405, event)
-        startPos = [event.pageX, event.pageY]
-        $body.ontouchmove = mouseMove
-      }
-      $body.ontouchend = function (event) {
-        console.log(410, event)
-        posRotate[1] -= event.pageX - startPos[0]
-        posRotate[0] -= event.pageY - startPos[1]
-        startPos = null
-        $body.onmousemove = null
-      } */
 
       const shadow = {
         hub: {},

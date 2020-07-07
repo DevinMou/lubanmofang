@@ -763,7 +763,40 @@
       console.log('cancel:', event)
     }
   }
-
+  function animation(len, fn, time, r = 0) {
+    function dx(dt) {
+      return (2 * v - dt * a) * dt / 2
+    }
+    function rafCallBack(timestamp) {
+      !start && (start = timestamp)
+      const dt = timestamp - start
+      start = timestamp
+      if (dt) {
+        const dlen = dx(dt)
+        fn(dlen)
+        len -= dlen
+        time -= dt
+        v -= dt * a
+      }
+      if (time > dt) {
+        window.requestAnimationFrame(rafCallBack)
+      } else {
+        console.timeEnd('animation')
+        fn(len)
+      }
+    }
+    /* const maxA = 2 * len / time ** 2
+    a = Math.min(maxA, a)
+    let v = time * a / 2 + len / time */
+    const maxV = len / time
+    // v0 = Math.min(maxV, v0)
+    const v0 = (r > 1 ? 1 : r) * maxV
+    a = 2 * (maxV - v0) / time
+    let v = time * a / 2 + len / time
+    console.time('animation')
+    let start = null
+    window.requestAnimationFrame(rafCallBack)
+  }
   ready(function () {
     ReactData.$body = document.body
     ReactData.$main = document.querySelector('.main')
@@ -806,8 +839,9 @@
       })
 
       const swipers = document.querySelectorAll('.swiper')
-      const $height = document.documentElement.offsetHeight
-      const $width = document.documentElement.offsetWidth
+      const screen = window.screen
+      const $height = screen.availHeight
+      const $width = screen.availWidth
       const fixWidth = $width * 0.3 //a
       const baseHeight = ($height - fixWidth) / 2
       const baseWidth = baseHeight < fixWidth ? baseHeight : fixWidth * 0.6 //b
@@ -857,12 +891,7 @@
               }
             })
           }
-          function animation(len, fn, time, v, a = 0) {
-            function dx(dt) {
-              return dt ** 2 * a / 2 + (2 * a * len + v ** 2) * 0.5 * dt
-            }
-            window.requestAnimationFrame()
-          }
+
           const children = Array.from($swiper.children)
           setTranslate()
           touch.register({
@@ -874,12 +903,28 @@
             end() {
               if (distance > 0) {
                 if (distance > baseWidth / 2) {
-
+                  animation(baseWidth - distance, dy => {
+                    distance += dy
+                    setTranslate()
+                  }, 300, 0.5)
                 } else {
-
+                  animation(distance, dy => {
+                    distance -= dy
+                    setTranslate()
+                  }, 300, 0.5)
                 }
               } else if (distance < 0) {
-
+                if (-distance > baseWidth / 2) {
+                  animation(baseWidth + distance, dy => {
+                    distance -= dy
+                    setTranslate()
+                  }, 300, 0.5)
+                } else {
+                  animation(-distance, dy => {
+                    distance += dy
+                    setTranslate()
+                  }, 300, 0.5)
+                }
               }
             }
           })

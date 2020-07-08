@@ -67,7 +67,7 @@
       top: calc(50vh - 15vw);
     }
 
-    .fixed .swiper>div:nth-child(1) {
+    /* .fixed .swiper>div:nth-child(1) {
       background: red;
     }
 
@@ -93,7 +93,7 @@
 
     .fixed .swiper>div:nth-child(7) {
       background: purple;
-    }
+    } */
 
     .background-board {
       position: absolute;
@@ -236,6 +236,36 @@
       border-top: 0;
     }
   </style>
+  <style>
+    .part {
+      position: relative;
+    }
+
+    .part-perspective {
+      backface-visibility: hidden;
+      transform-style: preserve-3d;
+      perspective-origin: center;
+      transform: rotateX(75deg) rotateZ(-20deg);
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      font-size: 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .part-container {
+      width: 30px;
+      height: 30px;
+      transform: translate3d(-50%, -50%, 0);
+      display: inline-block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-style: preserve-3d;
+    }
+  </style>
   <style id="var-style">
     .background-board {
       transform: translateZ(-90px);
@@ -265,13 +295,6 @@
   </div>
   <div class="fixed">
     <div class="swiper">
-      <div>A</div>
-      <div>B</div>
-      <div>C</div>
-      <div>D</div>
-      <div>E</div>
-      <div>F</div>
-      <div>G</div>
     </div>
   </div>
 </body>
@@ -310,6 +333,7 @@
       _this.site = [...site]
       _this.hideFace = {}
       _this.size = size
+      _this.offset = [0, 0, 0]
       parentNode.appendChild(_this.createEl())
       _this.style = new Proxy({}, {
         set(target, propKey, value) {
@@ -366,6 +390,9 @@
         }
       }
     }
+    setOffset(offset) {
+      this.offset = [...offset]
+    }
     styleobj2str(obj) {
       obj = obj || {}
       obj.width = obj.width || this.size
@@ -384,7 +411,7 @@
             break
           case 'transform':
             if (tp === 'object') {
-              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0)) * ReactData.size}px,${(this.site[1] - 1 + (value.translate[1] || 0)) * ReactData.size}px,${(this.site[0] - 1 + (value.translate[2] || 0)) * ReactData.size}px)` : '',
+              obj[name] = [value.translate ? `translate3d(${(this.site[2] + this.offset[0] - 1 + (value.translate[0] || 0)) * this.size}px,${(this.site[1] + this.offset[1] - 1 + (value.translate[1] || 0)) * this.size}px,${(this.site[0] + this.offset[2] - 1 + (value.translate[2] || 0)) * this.size}px)` : '',
               value.rotate ? [
                 value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : '',
                 value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : '',
@@ -458,8 +485,9 @@
       }) */
       //this.setHideFace(bgColor, noHide)
     }
-    init(numArr, bgColor, noHide) {
+    init(numArr, bgColor, noHide, offset) {
       this.setSite(numArr)
+      offset && this.setOffset(offset)
       this.setColor(bgColor)
       this.setHideFace(bgColor, noHide)
     }
@@ -524,12 +552,24 @@
 
   class ACB { // assemble cube
     constructor(el, size) {// num = 27|4|3
-      const blocks = [[]]
+      const blocks = []
       this.blocks = []
       const df = document.createDocumentFragment()
-      for (let i = 0; i < 4; i++) {
-        const item = new SmallCube(df)
-        blocks[0].push(item)
+      for (let i = 0; i < 7; i++) {
+        const part = document.createElement('div')
+        part.className = 'part'
+        const partView = document.createElement('div')
+        partView.className = 'part-perspective'
+        // const partBg = document.createElement('div')
+        const partContainer = document.createElement('div')
+        partContainer.className = 'part-container'
+        partView.appendChild(partContainer)
+        part.appendChild(partView)
+        df.appendChild(part)
+        for (let j = 0; j < (i === 0 ? 3 : 4); j++) {
+          blocks[i] = blocks[i] || []
+          blocks[i].push(new SmallCube(partContainer, [0, 0, 0], size))
+        }
       }
       blocks.forEach(item => {
         this.blocks.push(new Block(item, this.blocks))
@@ -539,9 +579,11 @@
     load(data, colors, noHide) {
       this.show()
       let p3
-      const res = data.map(item => block2points(item)).filter(item => item.length === 3 ? (p3 = item, false) : true);
+      const res = data.map(item => {
+        return { offset: item.offset, points: block2points(bulks[item].points) }
+      }).filter(item => item.points.length === 3 ? (p3 = item, false) : true);
       ([p3, ...res]).forEach((item, index) => {
-        this.blocks[index].init(item, (colors && colors[index]) || 'transparent', noHide)
+        this.blocks[index].init(item.points, (colors && colors[index]) || 'transparent', noHide, item.offset)
       })
     }
     show(indexs) {
@@ -838,6 +880,8 @@
         }
       })
 
+      const exhibit = new ACB($fixed.children[0], 30)
+
       const swipers = document.querySelectorAll('.swiper')
       const screen = window.screen
       const $height = screen.availHeight
@@ -963,17 +1007,16 @@
       $ct.children[1].appendChild(df)
       shadow.init()
       shadow.render()
-      /* const exhibit = new ACB(true, $ct.children[0], 60)
-      exhibit.load([
-        [1000, 2000, 3170],
+      exhibit.load([-1, 3, 6, 2, 5, 4, 1
+        /* [1000, 2000, 3170],
         [1000, 2011, 3003],
         [1000, 2320, 3200],
         [1004, 2004, 3004],
         [1013, 2002, 3000],
         [1040, 2440, 3400],
-        [1720, 2000, 3000]
+        [1720, 2000, 3000] */
       ], ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'])
-      window.$ehb = exhibit */
+      window.$ehb = exhibit
 
 
 

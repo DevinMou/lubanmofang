@@ -626,7 +626,7 @@
   const bulks = {
     '-2': {
       points: [1040, 1002, 1004],
-      offset: [0, 0, 0]
+      offset: [0.5, -0.5, -2.5]
     },
     '-1': {
       points: [1004, 2004, 3004],
@@ -634,15 +634,15 @@
     },
     0: {
       points: [1040, 1020, 1004, 1002],
-      offset: [0, 0, 0]
+      offset: [0.5, -0.5, -2.5]
     },
     1: {
       points: [1020, 1004, 1002, 1001],
-      offset: [0, 0, 0]
+      offset: [0, -0.5, -2.5]
     },
     2: {
       points: [1040, 1020, 1004, 2040],
-      offset: [0, 0, 0]
+      offset: [0.5, -0.5, -2]
     },
     3: {
       points: [1040, 1004, 1002, 1001],
@@ -650,11 +650,11 @@
     },
     4: {
       points: [1040, 1020, 1002, 1001],
-      offset: [0, 0, 0]
+      offset: [0, -0.5, -2.5]
     },
     5: {
       points: [1040, 1020, 1004, 2020],
-      offset: [0, 0, 0]
+      offset: [0.5, -0.5, -2]
     },
     6: {
       points: [1040, 1020, 1004, 2004],
@@ -691,6 +691,8 @@
     constructor($body) {
       this.hub = new WeakMap()
       this.touches = {}
+      this.lock = false
+      this.timer = null
       this.$body = $body
       $body.ontouchstart = this.startHandle.bind(this)
       $body.ontouchend = this.endHandle.bind(this)
@@ -704,7 +706,7 @@
         const value = events[eventName]
         if (eventName === 'click' || eventName === 'press') {
           oldObj[eventName] = oldObj[eventName] || {}
-          oldObj[eventName][value[0]] = value[1]
+          oldObj[eventName][value[0]] = value.slice(1)
         } else {
           oldObj[eventName] = value
         }
@@ -712,7 +714,10 @@
       this.hub.set(el, oldObj)
     }
     startHandle(event) {
-      // event.preventDefault()
+      if (this.lock) {
+        return
+      }
+      event.preventDefault()
       event.stopPropagation()
       const nowDate = new Date().getTime()
       Array.prototype.forEach.call(event.changedTouches, item => {
@@ -740,13 +745,40 @@
             if (events.start) {
               events.start.bind(touch)()
             }
+            if (events.press) {
+              const timeArr = Object.keys(events.press)
+              const _this = this
+              function timeFn() {
+                if (timeArr.length) {
+                  const time = timeArr.shift()
+                  return setTimeout(() => {
+                    const [fn, bubble] = events.press[time]
+                    if (bubble) {
+                      _this.timer = timeFn()
+                    } else {
+                      _this.timer = null
+                    }
+                    fn()
+                  }, time)
+                } else {
+                  return null
+                }
+              }
+              this.timer = timeFn()
+            }
           }
         }
       })
     }
     moveHandle(event) {
+      if (this.lock) {
+        return
+      }
       // event.preventDefault()
       event.stopPropagation()
+      if (this.timer !== null) {
+        clearTimeout(this.timer)
+      }
       Array.prototype.forEach.call(event.changedTouches, item => {
         const { pageX, pageY, identifier } = item
         const touch = this.touches[identifier]
@@ -762,8 +794,14 @@
       })
     }
     endHandle(event) {
+      if (this.lock) {
+        return
+      }
       event.preventDefault()
       event.stopPropagation()
+      if (this.timer !== null) {
+        clearTimeout(this.timer)
+      }
       const nowDate = new Date().getTime()
       Array.prototype.forEach.call(event.changedTouches, item => {
         const { pageX, pageY, identifier } = item
@@ -778,7 +816,7 @@
         } else if (touch.status === TouchEvent.STATUS_DOWN) {
           if (touch.events.combo === 0) {
             if (derDate >= TouchEvent.COMBO_DELAY) {
-              const pressKey = touch.events.press && Object.keys(touch.events.press).numSort()
+              /* const pressKey = touch.events.press && Object.keys(touch.events.press).numSort()
               if (pressKey) {
                 let tempDate = null
                 for (let i = 0; i < pressKey.length; i++) {
@@ -792,7 +830,7 @@
                   execed = true
                   touch.events.press[tempDate].bind(touch)()
                 }
-              }
+              } */
             } else {
               touch.events.combo += 1
             }
@@ -803,9 +841,9 @@
               touch.events.combo += 1
             }
           }
-          if (touch.events.combo > 0 && touch.events.click && touch.events.click[touch.events.combo]) {
+          if (touch.events.combo > 0 && touch.events.click && touch.events.click[touch.events.combo] && touch.events.click[touch.events.combo][0]) {
             execed = true
-            touch.events.click[touch.events.combo].bind(touch)()
+            touch.events.click[touch.events.combo][0].bind(touch)()
           }
         }
         touch.events.lastDate = nowDate
@@ -816,6 +854,9 @@
       })
     }
     cancelHandle(event) {
+      if (this.timer !== null) {
+        clearTimeout(this.timer)
+      }
       console.log('cancel:', event)
     }
   }
@@ -839,6 +880,7 @@
       } else {
         console.timeEnd('animation')
         fn(len)
+        resolve()
       }
     }
     /* const maxA = 2 * len / time ** 2
@@ -851,7 +893,11 @@
     let v = time * a / 2 + len / time
     console.time('animation')
     let start = null
-    window.requestAnimationFrame(rafCallBack)
+    let resolve
+    return new Promise(r => {
+      resolve = r
+      window.requestAnimationFrame(rafCallBack)
+    })
   }
   ready(function () {
     ReactData.$body = document.body
@@ -866,6 +912,9 @@
       let elem = event.target
       isFullscreen = document.fullscreenElement === elem
 
+    }
+    document.oncontextmenu = function (event) {
+      event.preventDefault()
     }
     const { $body, $main, $pb, $ct, $fixed } = ReactData
     let r = 1
@@ -951,6 +1000,7 @@
           }
 
           const children = Array.from($swiper.children)
+          let mode = 0 //0:scroll; 1:rotate; 2:move;
           setTranslate()
           touch.register({
             el: $swiper,
@@ -958,33 +1008,43 @@
               distance += (pageY - this.pageY) * baseWidth * 2 / $height
               setTranslate()
             },
-            end() {
+            async end() {
+              this.lock = true
               if (distance > 0) {
                 if (distance > baseWidth / 2) {
-                  animation(baseWidth - distance, dy => {
+                  await animation(baseWidth - distance, dy => {
                     distance += dy
                     setTranslate()
                   }, 300, 0.5)
                 } else {
-                  animation(distance, dy => {
+                  await animation(distance, dy => {
                     distance -= dy
                     setTranslate()
                   }, 300, 0.5)
                 }
               } else if (distance < 0) {
                 if (-distance > baseWidth / 2) {
-                  animation(baseWidth + distance, dy => {
+                  await animation(baseWidth + distance, dy => {
                     distance -= dy
                     setTranslate()
                   }, 300, 0.5)
                 } else {
-                  animation(-distance, dy => {
+                  await animation(-distance, dy => {
                     distance += dy
                     setTranslate()
                   }, 300, 0.5)
                 }
               }
-            }
+              this.lock = false
+            },
+            click: [2, function () {
+              mode = mode === 1 ? 0 : 1
+              console.log(1008, mode)
+            }],
+            press: [1000, function () {
+              mode = mode === 2 ? 0 : 2
+              console.log(1012, mode)
+            }]
           })
         })
       }

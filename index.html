@@ -241,21 +241,24 @@
       position: relative;
     }
 
+    .part.center {
+      background-color: #70bae685;
+    }
+
     .part-perspective {
       backface-visibility: hidden;
       transform-style: preserve-3d;
       perspective-origin: center;
-      transform: rotateX(75deg) rotateZ(-20deg);
+      /* transform: rotateX(75deg) rotateZ(-20deg); */
       position: absolute;
       width: 100%;
       height: 100%;
       top: 0;
       left: 0;
       font-size: 0;
-      background: rgba(0, 0, 0, 0.3);
     }
 
-    .part-perspective::after {
+    /* .part-perspective::after {
       content: '';
       display: block;
       width: 10px;
@@ -266,7 +269,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-    }
+    } */
 
     .part-container {
       width: 30px;
@@ -277,6 +280,16 @@
       top: 50%;
       left: 50%;
       transform-style: preserve-3d;
+    }
+  </style>
+  <style id="touch-style">
+    .main-touch,
+    .deputy-touch {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
     }
   </style>
   <style id="var-style">
@@ -305,10 +318,12 @@
         <div class="virtual"></div>
       </div>
     </div>
+    <div class="main-touch"></div>
   </div>
   <div class="fixed">
     <div class="swiper">
     </div>
+    <div class="deputy-touch"></div>
   </div>
 </body>
 <script src="./index.js"></script>
@@ -478,14 +493,24 @@
   }
 
   class Block {
-    constructor(cubes, parent, size, parentNode) {
+    constructor(cubes, parent, size, parentNode, documentFragment) {
       this.hub = {}
       this.cubes = cubes
       this.parent = parent
       this.offset = [0, 0, 0]
       this.size = size
-      this.parentNode = parentNode
-
+      this.rotateAngle = [1, 1, 1] //x,y,z
+      const part = document.createElement('div')
+      part.className = 'part'
+      this.scrollLayer = part
+      const partView = document.createElement('div')
+      partView.className = 'part-perspective'
+      this.perspectiveLayer = partView
+      this.containerLayer = parentNode
+      partView.appendChild(parentNode)
+      part.appendChild(partView)
+      documentFragment.appendChild(part)
+      // this.parentNode = partContainer
       /* numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
         a.forEach((b, bi) => {
           b.forEach((c, ci) => {
@@ -501,7 +526,7 @@
     init(numArr, bgColor, noHide, offset) {
       if (offset !== undefined) {
         this.offset = offset || [0, 0, 0]
-        this.parentNode.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0] * this.size}px),calc(-50% + ${this.offset[1] * this.size}px),${((1 + this.offset[2]) * this.size)}px)`
+        this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0] * this.size}px),calc(-50% + ${this.offset[1] * this.size}px),${((1 + this.offset[2]) * this.size)}px)`
       }
       this.setSite(numArr)
       this.setColor(bgColor)
@@ -571,21 +596,13 @@
       this.blocks = []
       const df = document.createDocumentFragment()
       for (let i = 0; i < 7; i++) {
-        const part = document.createElement('div')
-        part.className = 'part'
-        const partView = document.createElement('div')
-        partView.className = 'part-perspective'
-        // const partBg = document.createElement('div')
+        const block = []
         const partContainer = document.createElement('div')
         partContainer.className = 'part-container'
-        partView.appendChild(partContainer)
-        part.appendChild(partView)
-        df.appendChild(part)
-        const block = []
         for (let j = 0; j < (i === 0 ? 3 : 4); j++) {
           block.push(new SmallCube(partContainer, [0, 0, 0], size))
         }
-        this.blocks.push(new Block(block, this.blocks, size, partContainer))
+        this.blocks.push(new Block(block, this.blocks, size, partContainer, df))
       }
       el.appendChild(df)
     }
@@ -599,6 +616,9 @@
       ([p3, ...res]).forEach((item, index) => {
         this.blocks[index].init(item.points, (colors && colors[index]) || 'transparent', noHide, item.offset)
       })
+    }
+    getChildren() {
+      return [...this.blocks]
     }
     show(indexs) {
       const isArr = Array.isArray(indexs)
@@ -878,8 +898,7 @@
       if (time > dt) {
         window.requestAnimationFrame(rafCallBack)
       } else {
-        console.timeEnd('animation')
-        fn(len)
+        fn(len, true)
         resolve()
       }
     }
@@ -891,7 +910,6 @@
     const v0 = (r > 1 ? 1 : r) * maxV
     a = 2 * (maxV - v0) / time
     let v = time * a / 2 + len / time
-    console.time('animation')
     let start = null
     let resolve
     return new Promise(r => {
@@ -902,6 +920,8 @@
   ready(function () {
     ReactData.$body = document.body
     ReactData.$main = document.querySelector('.main')
+    ReactData.$mainTouch = document.querySelector('.main-touch')
+    ReactData.$byTouch = document.querySelector('.deputy-touch')
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
@@ -916,7 +936,7 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
-    const { $body, $main, $pb, $ct, $fixed } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch } = ReactData
     let r = 1
     let startPos = null
     let posRotate = [75, -20]
@@ -924,7 +944,7 @@
     if ($pb) {
       const touch = new TouchEvent($body)
       touch.register({
-        el: $main,
+        el: $mainTouch,
         click: [3, async function () {
           if (this.events.combo === 3) {
             if (fullscreenEnabled) {
@@ -943,7 +963,6 @@
         }
       })
 
-      const exhibit = new ACB($fixed.children[0], 30)
 
       const swipers = document.querySelectorAll('.swiper')
       const screen = window.screen
@@ -951,13 +970,19 @@
       const $width = screen.availWidth
       const fixWidth = $width * 0.3 //a
       const baseHeight = ($height - fixWidth) / 2
-      const baseWidth = baseHeight < fixWidth ? baseHeight : fixWidth * 0.6 //b
+      const baseWidth = (baseHeight < fixWidth ? baseHeight : fixWidth * 0.6).toFixed(5) - 0 //b
       let distance = 0
+
+      const exhibit = new ACB($fixed.children[0], fixWidth / 5 | 0)
+
       if (swipers) {
         Array.prototype.forEach.call(swipers, $swiper => {
-          function setTranslate() {
+          function setTranslate(border = false) {
+            if (border) {
+              distance = distance.toFixed(5) - 0
+            }
             const isDown = distance > 0
-            const len = children.length
+            const len = byChildren.length
             const baseIndex = len / 2 | 0
             const indexDelta = distance / baseWidth | 0
             const offset = distance % baseWidth //c
@@ -966,84 +991,110 @@
             distance = offset
             if (indexDelta) {
               if (indexDelta > 0) {
-                children.splice(0, 0, ...children.splice(len - indexDelta, indexDelta))
+                byChildren.splice(0, 0, ...byChildren.splice(len - indexDelta, indexDelta))
               } else {
-                children.splice(len, 0, ...children.splice(0, -indexDelta))
+                byChildren.splice(len, 0, ...byChildren.splice(0, -indexDelta))
               }
             }
-            children.forEach((item, index) => {
+            byChildren.forEach((item, index) => {
+              const scrollLayer = item.scrollLayer
               const baseTop = (index - baseIndex) * baseWidth + (index < baseIndex ? -offsetBase : offsetBase)
               if (isDown) {
                 if (index === baseIndex - 1) {
                   const $scale = (baseWidth - offset + rate) / fixWidth
-                  item.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
                 } else if (index === baseIndex) {
                   const $scale = (fixWidth + offset - rate) / fixWidth
-                  item.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
                 } else {
                   const $scale = baseWidth / fixWidth
-                  item.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
                 }
               } else {
                 if (index === baseIndex + 1) {
                   const $scale = (baseWidth + offset - rate) / fixWidth
-                  item.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
                 } else if (index === baseIndex) {
                   const $scale = (fixWidth - offset + rate) / fixWidth
-                  item.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
                 } else {
                   const $scale = baseWidth / fixWidth
-                  item.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
                 }
               }
             })
+            if (border) {
+              center.scrollLayer.classList.remove('center')
+              center = byChildren[baseIndex]
+              center.scrollLayer.classList.add('center')
+            }
           }
 
-          const children = Array.from($swiper.children)
+          // const children = Array.from($swiper.children)
+          const byChildren = exhibit.getChildren()
           let mode = 0 //0:scroll; 1:rotate; 2:move;
+          let center = byChildren[byChildren.length / 2 | 0]
           setTranslate()
           touch.register({
-            el: $swiper,
+            el: $byTouch,
             move(pageX, pageY) {
-              distance += (pageY - this.pageY) * baseWidth * 2 / $height
-              setTranslate()
+              if (mode === 0) {
+                distance += (pageY - this.pageY) * baseWidth * 2 / $height
+                setTranslate()
+              } else if (mode === 1) {
+                const dx = pageX - this.pageX
+                const dy = pageY - this.pageY
+                const [vx, vy, va] = getVA(dx, dy, 10)
+                center.rotateAngle = rotVector(center.rotateAngle, [vx, vy, 0, va])
+
+                const [rx, ry, rz, ra] = rotate3d(center.rotateAngle)
+                center.perspectiveLayer.style.transform = `rotate3d(${[rx, ry, rz].join(',')},${ra}rad)`
+              }
+
             },
             async end() {
               this.lock = true
-              if (distance > 0) {
-                if (distance > baseWidth / 2) {
-                  await animation(baseWidth - distance, dy => {
-                    distance += dy
-                    setTranslate()
-                  }, 300, 0.5)
-                } else {
-                  await animation(distance, dy => {
-                    distance -= dy
-                    setTranslate()
-                  }, 300, 0.5)
-                }
-              } else if (distance < 0) {
-                if (-distance > baseWidth / 2) {
-                  await animation(baseWidth + distance, dy => {
-                    distance -= dy
-                    setTranslate()
-                  }, 300, 0.5)
-                } else {
-                  await animation(-distance, dy => {
-                    distance += dy
-                    setTranslate()
-                  }, 300, 0.5)
+              if (mode === 0) {
+                if (distance > 0) {
+                  if (distance > baseWidth / 2) {
+                    await animation(baseWidth - distance, (dy, done) => {
+                      distance += dy
+                      setTranslate(done)
+                    }, 300, 0.5)
+                  } else {
+                    await animation(distance, (dy, done) => {
+                      distance -= dy
+                      setTranslate(done)
+                    }, 300, 0.5)
+                  }
+                } else if (distance < 0) {
+                  if (-distance > baseWidth / 2) {
+                    await animation(baseWidth + distance, (dy, done) => {
+                      distance -= dy
+                      setTranslate(done)
+                    }, 300, 0.5)
+                  } else {
+                    await animation(-distance, (dy, done) => {
+                      distance += dy
+                      setTranslate(done)
+                    }, 300, 0.5)
+                  }
                 }
               }
               this.lock = false
             },
             click: [2, function () {
               mode = mode === 1 ? 0 : 1
-              console.log(1008, mode)
+              if (mode === 1) {
+                center.scrollLayer.classList.remove('center')
+                center = byChildren[byChildren.length / 2 | 0]
+                center.scrollLayer.classList.add('center')
+              } else {
+                center.scrollLayer.classList.remove('center')
+              }
             }],
             press: [1000, function () {
               mode = mode === 2 ? 0 : 2
-              console.log(1012, mode)
             }]
           })
         })

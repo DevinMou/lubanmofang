@@ -612,3 +612,29 @@ function streamBlock(start, n) {
   }
   return res
 }
+
+function rotVector([u, v, w], [x, y, z, a]) { // x*x+y*y+z*z = 1
+  let cosT = Math.cos(a)
+  let sinT = Math.sin(a)
+  const rate = (x ** 2 + y ** 2 + z ** 2) ** 0.5
+  x /= rate
+  y /= rate
+  z /= rate
+  rx = u * cosT + (y * w - z * v) * sinT + x * (x * u + y * v + z * w) * (1 - cosT)
+  ry = v * cosT + (z * u - x * w) * sinT + y * (x * u + y * v + z * w) * (1 - cosT)
+  rz = w * cosT + (x * v - y * u) * sinT + z * (x * u + y * v + z * w) * (1 - cosT)
+  return [rx, ry, rz]
+}
+
+function rotate3d([rx, ry, rz]) {
+  let u = 1, v = 1, w = 1
+  const angle = Math.acos((rx * u + ry * v + rz * w) / Math.sqrt((rx ** 2 + ry ** 2 + rz ** 2) * (u ** 2 + v ** 2 + w ** 2)))
+  return [v * rz - w * ry, -w * rx + u * rz, u * ry - v * rx, angle]
+}
+
+function getVA(x, y, r) {
+  const quadrant = [[true, true], [true, false], [false, false], [false, true]]
+  const index = quadrant.findIndex(item => x > 0 === item[0] && -y > 0 === item[1])
+  const vIndex = index === 3 ? 0 : index + 1
+  return [(y >= 0 ? y : -y) * (quadrant[vIndex][0] ? 1 : -1), (x >= 0 ? x : -x) * (quadrant[vIndex][0] ? 1 : -1), (x ** 2 + y ** 2) ** 0.5 / r]
+}

@@ -1003,24 +1003,24 @@
               if (isDown) {
                 if (index === baseIndex - 1) {
                   const $scale = (baseWidth - offset + rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
                 } else if (index === baseIndex) {
                   const $scale = (fixWidth + offset - rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
                 } else {
                   const $scale = baseWidth / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
                 }
               } else {
                 if (index === baseIndex + 1) {
                   const $scale = (baseWidth + offset - rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
                 } else if (index === baseIndex) {
                   const $scale = (fixWidth - offset + rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
                 } else {
                   const $scale = baseWidth / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale}) rotateX(90deg);`
+                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
                 }
               }
             })
@@ -1046,8 +1046,8 @@
                 const dx = pageX - this.pageX
                 const dy = pageY - this.pageY
                 center.rotateAngle = rotVector(center.rotateAngle, getK(dx, dy, 10))
-                const rotK = rotate3d([0, -1, 0], center.rotateAngle)
-                center.perspectiveLayer.style.transform = `rotate3d(${rotK.join(',')}rad)`
+                const [x, y, z, a] = rotate3d([0, 0, 1], center.rotateAngle)
+                center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
               }
 
             },

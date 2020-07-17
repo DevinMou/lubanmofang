@@ -636,8 +636,9 @@ function rotate3d([u, v, w], [rx, ry, rz]) {
 }
 
 function getK(x, y, r) {
-  const o = [0, -1, 0]
+  y *= -1
+  const o = [0, 0, 1]
   const { sin, cos } = Math
-  const v = [cos(y / r) * sin(x / r), -cos(y / r) * cos(x / r), -sin(y / r)]
+  const v = [cos(y / r) * sin(x / r), sin(y / r), cos(y / r) * cos(x / r),]
   return rotate3d(o, v)
 }

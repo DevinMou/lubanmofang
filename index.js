@@ -631,6 +631,14 @@ function rotVector([u, v, w], [x, y, z, a]) { // x*x+y*y+z*z = 1
 }
 
 function rotate3d([u, v, w], [rx, ry, rz]) {
+  const rateK = (rx ** 2 + ry ** 2 + rz ** 2) ** 0.5
+  rx /= rateK
+  ry /= rateK
+  rz /= rateK
+  const rateV = (u ** 2 + v ** 2 + w ** 2) ** 0.5
+  u /= rateV
+  v /= rateV
+  w /= rateV
   const angle = Math.acos((rx * u + ry * v + rz * w) / Math.sqrt((rx ** 2 + ry ** 2 + rz ** 2) * (u ** 2 + v ** 2 + w ** 2)))
   return [v * rz - w * ry, w * rx - u * rz, u * ry - v * rx, angle]
 }
@@ -641,4 +649,20 @@ function getK(x, y, r) {
   const { sin, cos } = Math
   const v = [cos(y / r) * sin(x / r), sin(y / r), cos(y / r) * cos(x / r),]
   return rotate3d(o, v)
+}
+
+function v2q([u, v, w, a]) {
+  const r = (u ** 2 + v ** 2 + w ** 2) ** 0.5
+  const c = Math.cos(a / 2)
+  const s = Math.sin(a / 2)
+  return [c, [s * u / r, s * v / r, s * w / r]]
+}
+
+function vector4(q1, q2) {
+  const [s, [x1, y1, z1]] = v2q(q1)
+  const [t, [x2, y2, z2]] = v2q(q2)
+  const [ac, [u, v, w]] = [t * s - (x1 * x2 + y1 * y2 + z1 * z2), [t * x1 + s * x2 + y1 * z2 - y2 * z1, t * y1 + s * y2 + z1 * x2 - x1 * z2, t * z1 + s * z2 + x1 * y2 - x2 * y1]]
+  const a = 2 * Math.acos(ac)
+  const sin = Math.sin(a / 2)
+  return [u / sin, v / sin, w / sin, a]
 }

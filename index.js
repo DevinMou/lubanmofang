@@ -627,7 +627,7 @@ function rotVector([u, v, w], [x, y, z, a]) { // x*x+y*y+z*z = 1
   rx = u * cosT + (y * w - z * v) * sinT + x * (x * u + y * v + z * w) * (1 - cosT)
   ry = v * cosT + (z * u - x * w) * sinT + y * (x * u + y * v + z * w) * (1 - cosT)
   rz = w * cosT + (x * v - y * u) * sinT + z * (x * u + y * v + z * w) * (1 - cosT)
-  return [rx.toFixed(5) - 0, ry.toFixed(5) - 0, rz.toFixed(5) - 0]
+  return [rx, ry, rz]
 }
 
 function rotate3d([u, v, w], [rx, ry, rz]) {
@@ -660,9 +660,19 @@ function v2q([u, v, w, a]) {
 
 function vector4(q1, q2) {
   const [s, [x1, y1, z1]] = v2q(q1)
-  const [t, [x2, y2, z2]] = v2q(q2)
+  const [t, [x2, y2, z2]] = v2q(rotVector(q2.slice(0, 3), q1.slice(0, 3).concat(-q1[3])).concat(q2[3]))
   const [ac, [u, v, w]] = [t * s - (x1 * x2 + y1 * y2 + z1 * z2), [t * x1 + s * x2 + y1 * z2 - y2 * z1, t * y1 + s * y2 + z1 * x2 - x1 * z2, t * z1 + s * z2 + x1 * y2 - x2 * y1]]
   const a = 2 * Math.acos(ac)
   const sin = Math.sin(a / 2)
   return [u / sin, v / sin, w / sin, a]
+}
+
+function getCorrectRot(K, k0) {
+  function correct(val) {
+    const n = val < 0 ? -1 : 1
+    return n * val < 0.5 ? 0 : 1 * n
+  }
+  const [ux, uy, uz] = rotVector([0, 0, 1], K)
+  const k2 = rotate3d([ux, uy, uz], [[correct(ux), correct(uy), correct(uz)]])
+  return vector4(k2, k0)
 }

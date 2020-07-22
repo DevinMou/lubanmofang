@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport"
-    content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui">
+    content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <!-- <meta name="full-screen" content="yes" />
   <meta name="x5-fullscreen" content="yes" />
@@ -539,7 +539,7 @@
       this.parent = parent
       this.offset = [0, 0, 0]
       this.size = size
-      this.rotateAngle = [0, 0, 1] //x,y,z
+      this.rotateAngle = null //x,y,z
       const part = document.createElement('div')
       part.className = 'part'
       this.scrollLayer = part
@@ -745,9 +745,6 @@
   }
 
   class TouchEvent {
-    static STATUS_DOWN = 0
-    static STATUS_MOVE = 1
-    static COMBO_DELAY = 500
     constructor($body) {
       this.hub = new WeakMap()
       this.touches = {}
@@ -920,6 +917,9 @@
       console.log('cancel:', event)
     }
   }
+  TouchEvent.STATUS_DOWN = 0;
+  TouchEvent.STATUS_MOVE = 1;
+  TouchEvent.COMBO_DELAY = 500;
   function animation(len, fn, time, r = 0) {
     function dx(dt) {
       return (2 * v - dt * a) * dt / 2
@@ -1000,6 +1000,12 @@
       $nv.style.transform = `translate3d(${x * j}px,${-y * j}px,${z * j}px)`
       $info.innerText = `dx:${dx.toFixed(3)},  dy${dy.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
     }
+    window.time = (delay, arr) => {
+      window.setTimeout(() => {
+        window.M(...arr)
+        window.time.loop && window.time(delay, arr)
+      }, delay)
+    }
     if ($pb) {
       const touch = new TouchEvent($body)
       touch.register({
@@ -1021,11 +1027,12 @@
           $pb.style.transform = `rotateX(${posRotate[0]}deg) rotateZ(${posRotate[1]}deg)` */
           const dx = pageX - this.pageX
           const dy = pageY - this.pageY
-          const [l1, l2, l3] = posRotate
+          M(dx, dy)
+          /* const [l1, l2, l3] = posRotate
           posRotate = rotVector(posRotate, getK(dx, dy, 20))
           const [x, y, z, a] = rotate3d([0, 0, 1], posRotate)
           $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
-          $info.innerText = `dx:${dx.toFixed(3)},  dy${y.toFixed(3)}:,  v:[${l1.toFixed(3)},${l2.toFixed(3)},${l3.toFixed(3)}, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
+          $info.innerText = `dx:${dx.toFixed(3)},  dy${y.toFixed(3)}:,  v:[${l1.toFixed(3)},${l2.toFixed(3)},${l3.toFixed(3)}, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]` */
         }
       })
 
@@ -1110,8 +1117,9 @@
               } else if (mode === 1) {
                 const dx = pageX - this.pageX
                 const dy = pageY - this.pageY
-                center.rotateAngle = rotVector(center.rotateAngle, getK(dx, dy, 10))
-                const [x, y, z, a] = rotate3d([0, 0, 1], center.rotateAngle)
+                const k = getK(dx, dy, 20)
+                center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, k) : k
+                const [x, y, z, a] = center.rotateAngle
                 center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
               }
 

@@ -676,3 +676,11 @@ function getCorrectRot(K, k0) {
   const k2 = rotate3d([ux, uy, uz], [[correct(ux), correct(uy), correct(uz)]])
   return vector4(k2, k0)
 }
+
+function deg2rot3d(payload) {
+  let k
+  payload.forEach(item => {
+    const r = [item.x || 0, -item.y || 0, item.z || 0]
+    k = k ? vector4(k, r) : r
+  })
+}

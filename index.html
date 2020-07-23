@@ -682,6 +682,41 @@
     }
   }
 
+  class Animate {
+    constructor(fn) {
+      this.pool = []
+      this.fn = fn
+      this.active = false
+      this.running = false
+    }
+    push(payload) {
+      this.running = true
+      this.pool.push(payload)
+      this.check()
+    }
+    stop() {
+      this.running = false
+    }
+    check() {
+      if (this.pool.length && !this.active) {
+        this.active = true
+        window.requestAnimationFrame(this.done.bind(this))
+      }
+    }
+    done() {
+      const args = [...this.pool]
+      this.pool.length = 0
+      if (this.running) {
+        this.fn(args)
+        this.active = false
+        this.check()
+      } else {
+        this.active = false
+      }
+
+    }
+  }
+
   // [<,-][田,T,刁,L,Z,厶,マ]
   const bulks = {
     '-2': {
@@ -920,7 +955,7 @@
   TouchEvent.STATUS_DOWN = 0;
   TouchEvent.STATUS_MOVE = 1;
   TouchEvent.COMBO_DELAY = 500;
-  function animation(len, fn, time, r = 0) {
+  function translation(len, fn, time, r = 0) {
     function dx(dt) {
       return (2 * v - dt * a) * dt / 2
     }
@@ -936,7 +971,7 @@
         v -= dt * a
       }
       if (time > dt) {
-        window.requestAnimationFrame(rafCallBack)
+        window.requesttranslationFrame(rafCallBack)
       } else {
         fn(len, true)
         resolve()
@@ -954,9 +989,10 @@
     let resolve
     return new Promise(r => {
       resolve = r
-      window.requestAnimationFrame(rafCallBack)
+      window.requesttranslationFrame(rafCallBack)
     })
   }
+
   ready(function () {
     ReactData.$body = document.body
     ReactData.$main = document.querySelector('.main')
@@ -1006,8 +1042,14 @@
         window.time.loop && window.time(delay, arr)
       }, delay)
     }
+    function rotateMove(args) {
+      // const [x, y, z, a] = args.reduce((a, b) => a + b)
+      const [x, y, z, a] = args.last()
+      $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+    }
     if ($pb) {
       const touch = new TouchEvent($body)
+      const mainAnimate = new Animate(rotateMove)
       touch.register({
         el: $mainTouch,
         click: [3, async function () {
@@ -1027,12 +1069,18 @@
           $pb.style.transform = `rotateX(${posRotate[0]}deg) rotateZ(${posRotate[1]}deg)` */
           const dx = pageX - this.pageX
           const dy = pageY - this.pageY
-          M(dx, dy)
+          const K = getK(dx, dy, 40)
+          posRotate = posRotate ? vector4(posRotate, K) : K
+          mainAnimate.push(posRotate)
+
           /* const [l1, l2, l3] = posRotate
           posRotate = rotVector(posRotate, getK(dx, dy, 20))
           const [x, y, z, a] = rotate3d([0, 0, 1], posRotate)
           $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
           $info.innerText = `dx:${dx.toFixed(3)},  dy${y.toFixed(3)}:,  v:[${l1.toFixed(3)},${l2.toFixed(3)},${l3.toFixed(3)}, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]` */
+        },
+        end() {
+          mainAnimate.stop()
         }
       })
 
@@ -1129,24 +1177,24 @@
               if (mode === 0) {
                 if (distance > 0) {
                   if (distance > baseWidth / 2) {
-                    await animation(baseWidth - distance, (dy, done) => {
+                    await translation(baseWidth - distance, (dy, done) => {
                       distance += dy
                       setTranslate(done)
                     }, 300, 0.5)
                   } else {
-                    await animation(distance, (dy, done) => {
+                    await translation(distance, (dy, done) => {
                       distance -= dy
                       setTranslate(done)
                     }, 300, 0.5)
                   }
                 } else if (distance < 0) {
                   if (-distance > baseWidth / 2) {
-                    await animation(baseWidth + distance, (dy, done) => {
+                    await translation(baseWidth + distance, (dy, done) => {
                       distance -= dy
                       setTranslate(done)
                     }, 300, 0.5)
                   } else {
-                    await animation(-distance, (dy, done) => {
+                    await translation(-distance, (dy, done) => {
                       distance += dy
                       setTranslate(done)
                     }, 300, 0.5)

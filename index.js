@@ -667,14 +667,30 @@ function vector4(q1, q2) {
   return [u / sin, v / sin, w / sin, a]
 }
 
-function getCorrectRot(K, k0) {
-  function correct(val) {
-    const n = val < 0 ? -1 : 1
-    return n * val < 0.5 ? 0 : 1 * n
+function vectorReverse(q, q1) {
+  const [xq, yq, zq, a] = q
+  const [s, [x1, y1, z1]] = v2q(q1)
+  const sin = Math.sin(a / 2)
+  const ac = Math.cos(a / 2)
+  const u = sin * xq
+  const v = sin * yq
+  const w = sin * zq
+
+}
+
+function getCorrectRot(k, k0) {
+  function correct([x, y, z, a]) {
+    const s = [x, y, z]
+    const arr = s.map(item => item < 0 ? -item : item)
+    const i = arr.indexOf(Math.max(...arr))
+    const res = [0, 0, 0]
+    res[i] = s[i] < 0 ? -1 : 1
+    return [...res, ((a / Math.PI / 2 + 0.5) | 0) * Math.PI / 2]
   }
-  const [ux, uy, uz] = rotVector([0, 0, 1], K)
-  const k2 = rotate3d([ux, uy, uz], [correct(ux), correct(uy), correct(uz)])
-  return vector4(k2, k0)
+  const k1 = correct(k)
+  const v1 = vector4(k, k1)
+  console.log(k, k1, v1, k0)
+  return vector4(v1, k0)
 }
 
 function deg2rot3d(...payload) {

@@ -971,7 +971,7 @@
         v -= dt * a
       }
       if (time > dt) {
-        window.requesttranslationFrame(rafCallBack)
+        window.requestAnimationFrame(rafCallBack)
       } else {
         fn(len, true)
         resolve()
@@ -989,7 +989,7 @@
     let resolve
     return new Promise(r => {
       resolve = r
-      window.requesttranslationFrame(rafCallBack)
+      window.requestAnimationFrame(rafCallBack)
     })
   }
 
@@ -1047,9 +1047,9 @@
       const [x, y, z, a] = args.last()
       $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
     }
+    const mainAnimate = new Animate(rotateMove)
     if ($pb) {
       const touch = new TouchEvent($body)
-      const mainAnimate = new Animate(rotateMove)
       touch.register({
         el: $mainTouch,
         click: [3, async function () {
@@ -1081,6 +1081,14 @@
         },
         end() {
           mainAnimate.stop()
+          const [x, y, z, a] = getCorrectRot(posRotate, deg2rot3d([0, 0]))
+
+          rotateMove([vector4(posRotate, [x, y, z, a])])
+          /* translation(a, (angle) => {
+            mainAnimate.push(vector4(posRotate, [x, y, z, angle]))
+          }, 500, 0.5).then(() => {
+            posRotate = vector4(posRotate, [x, y, z, a])
+          }) */
         }
       })
 

@@ -673,14 +673,21 @@ function getCorrectRot(K, k0) {
     return n * val < 0.5 ? 0 : 1 * n
   }
   const [ux, uy, uz] = rotVector([0, 0, 1], K)
-  const k2 = rotate3d([ux, uy, uz], [[correct(ux), correct(uy), correct(uz)]])
+  const k2 = rotate3d([ux, uy, uz], [correct(ux), correct(uy), correct(uz)])
   return vector4(k2, k0)
 }
 
-function deg2rot3d(payload) {
+function deg2rot3d(...payload) {
+  function n2b(val) { // [0,45] --- rotateX(45deg)
+    const arr = [-1, 1, -1]
+    const res = [0, 0, 0]
+    res[val[0]] = arr[val[0]]
+    return res.concat(val[1] / 360 * 2 * Math.PI)
+  }
   let k
   payload.forEach(item => {
-    const r = [item.x || 0, -item.y || 0, item.z || 0]
+    const r = n2b(item)
     k = k ? vector4(k, r) : r
   })
+  return k
 }

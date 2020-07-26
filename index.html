@@ -1046,6 +1046,7 @@
       // const [x, y, z, a] = args.reduce((a, b) => a + b)
       const [x, y, z, a] = args.last()
       $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+      $info.innerText = `x:${x.toFixed(3)},  y${y.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
     }
     const mainAnimate = new Animate(rotateMove)
     if ($pb) {
@@ -1081,14 +1082,20 @@
         },
         end() {
           mainAnimate.stop()
-          const [x, y, z, a] = getCorrectRot(posRotate, deg2rot3d([0, 0]))
+          return
+          if (this.status === TouchEvent.STATUS_DOWN) return
+          mainAnimate.stop()
+          const [[x, y, z, a], v0] = getCorrectRot(posRotate, deg2rot3d([0, -15], [1, -10]))
 
-          rotateMove([vector4(posRotate, [x, y, z, a])])
-          /* translation(a, (angle) => {
-            mainAnimate.push(vector4(posRotate, [x, y, z, angle]))
-          }, 500, 0.5).then(() => {
-            posRotate = vector4(posRotate, [x, y, z, a])
-          }) */
+          // rotateMove([vector4(posRotate, [x, y, z, a])])
+          let countA = 0
+          translation(a, (angle) => {
+            countA += angle
+            const v = vector4(posRotate, [x, y, z, countA], true)
+            mainAnimate.push(v[3] === 0 ? v0 : v)
+          }, 300, 0).then(() => {
+            posRotate = v0
+          })
         }
       })
 

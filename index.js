@@ -658,39 +658,71 @@ function v2q([u, v, w, a]) {
   return [c, [s * u / r, s * v / r, s * w / r]]
 }
 
-function vector4(q1, q2) {
+function vector4(q1, q2, direct) {
   const [s, [x1, y1, z1]] = v2q(q1)
-  const [t, [x2, y2, z2]] = v2q(rotVector(q2.slice(0, 3), q1.slice(0, 3).concat(-q1[3])).concat(q2[3]))
+  const [t, [x2, y2, z2]] = direct ? v2q(q2) : v2q(rotVector(q2.slice(0, 3), q1.slice(0, 3).concat(-q1[3])).concat(q2[3]))
   const [ac, [u, v, w]] = [t * s - (x1 * x2 + y1 * y2 + z1 * z2), [t * x1 + s * x2 + y1 * z2 - y2 * z1, t * y1 + s * y2 + z1 * x2 - x1 * z2, t * z1 + s * z2 + x1 * y2 - x2 * y1]]
   const a = 2 * Math.acos(ac)
   const sin = Math.sin(a / 2)
   return [u / sin, v / sin, w / sin, a]
 }
 
-function vectorReverse(q, q1) {
-  const [xq, yq, zq, a] = q
-  const [s, [x1, y1, z1]] = v2q(q1)
-  const sin = Math.sin(a / 2)
-  const ac = Math.cos(a / 2)
-  const u = sin * xq
-  const v = sin * yq
-  const w = sin * zq
+function vectorReverse(q1, q) {
+  const [x, y, z, a] = q1
+  const r = vector4(q, [x, y, z, -a])
+  return r
 
+  /* const [ac, [u, v, w]] = v2q(q)
+  const [s, [x1, y1, z1]] = v2q(q1)
+  const res = Cramer([x1, y1, z1, -s, -ac], [s, -z1, y1, x1, u], [z1, s, -x1, y1, v], [-y1, x1, s, z1, w])
+  if (res) {
+    const [x2, y2, z2, t] = res
+    const a = 2 * Math.acos(t)
+    const sin = Math.sin(a / 2)
+    return [x2 / sin, y2 / sin, z2 / sin, a]
+  } else {
+    return false
+  } */
 }
 
 function getCorrectRot(k, k0) {
   function correct([x, y, z, a]) {
-    const s = [x, y, z]
-    const arr = s.map(item => item < 0 ? -item : item)
-    const i = arr.indexOf(Math.max(...arr))
-    const res = [0, 0, 0]
-    res[i] = s[i] < 0 ? -1 : 1
-    return [...res, ((a / Math.PI / 2 + 0.5) | 0) * Math.PI / 2]
+    function D(val) {
+      return val < 0 ? -1 : val > 0 ? 1 : 0
+    }
+    function cA(n) {
+      return A * ((a * A / n / pi + 0.5) | 0) * pi * n
+    }
+    function getA(cdn) {
+      return Math.abs(vector4(cdn, [x, y, z, -a], true)[3])
+    }
+    const d = [D(x), D(y), D(z)]
+    const A = D(a)
+    const pi = Math.PI
+    const abs = [x * d[0], y * d[1], z * d[2]]
+    const absort = [...abs].numSort()
+    const is20 = absort[1] === 0
+    if (is20) {
+      const maxIndex = abs.indexOf(absort[2])
+      const cdn0 = [0, 0, 0, cA(1 / 2)]
+      cdn0[maxIndex] = d[maxIndex]
+      return cdn0
+    } else {
+      const minIndex = abs.indexOf(absort[0])
+      const maxIndex = abs.indexOf(absort[2])
+      const cdn3 = [d[0], d[1], d[2], cA(2 / 3)]
+      const cdn2 = [d[0], d[1], d[2], cA(1)]
+      cdn2[minIndex] = 0
+      const cdn1 = [0, 0, 0, cA(1 / 2)]
+      cdn1[maxIndex] = d[maxIndex]
+      const cdnA = [getA(cdn1), getA(cdn2), getA(cdn3)]
+      return [cdn1, cdn2, cdn3][cdnA.indexOf(Math.min(...cdnA))]
+    }
+
   }
-  const k1 = correct(k)
-  const v1 = vector4(k, k1)
-  console.log(k, k1, v1, k0)
-  return vector4(v1, k0)
+  const k1 = vector4(correct(k), k0)
+  const v1 = vectorReverse(k, k1)
+  return [v1, k1]
 }
 
 function deg2rot3d(...payload) {
@@ -706,4 +738,28 @@ function deg2rot3d(...payload) {
     k = k ? vector4(k, r) : r
   })
   return k
+}
+
+function det(...arrs) {
+  const A = arrs.slice(1)
+  return arrs.length === 1 ? arrs[0] : arrs[0].reduce((d, item, index) => d + (-1) ** index * item * det(...A.map(item$ => [...item$.slice(0, index), ...item$.slice(index + 1)])), 0)
+}
+
+function Cramer(...arrs) {
+  let a = [], b = [], len = arrs.length
+  arrs.forEach(item => (a.push(item.slice(0, len)), b.push(item[len])))
+  const D = det(...a)
+  if (D === 0) {
+    return false
+  } else {
+    const res = []
+    arrs.forEach((item, index) => {
+      res.push(det(...a.map((item$, index$) => {
+        const _item = [...item$]
+        _item.splice(index, 1, b[index$])
+        return _item
+      })) / D)
+    })
+    return res
+  }
 }

@@ -340,9 +340,17 @@
       border-top: 2vw solid transparent;
       border-bottom: 2vw solid transparent;
       border-radius: 50%;
+      transform-origin: center;
       position: absolute;
+      overflow: hidden;
       top: calc(50% - 15vw);
       left: 0;
+    }
+
+    .ring-through {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
     }
 
     .ring.active {
@@ -389,7 +397,9 @@
     <div class="swiper">
     </div>
     <div class="deputy-touch">
-      <div class="ring"></div>
+      <div class="ring">
+        <div class="ring-through"></div>
+      </div>
     </div>
   </div>
 </body>
@@ -1026,6 +1036,7 @@
     ReactData.$mainTouch = document.querySelector('.main-touch')
     ReactData.$byTouch = document.querySelector('.deputy-touch')
     ReactData.$ring = document.querySelector('.ring')
+    ReactData.$ringT = document.querySelector('.ring-through')
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
@@ -1040,7 +1051,7 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $ringT } = ReactData
     let r = 1
     let startPos = null
     // let posRotate = [75, -20]
@@ -1098,11 +1109,6 @@
           const dx = pageX - this.pageX
           const dy = pageY - this.pageY
           const K = getK(dx, dy, 40)
-          if (posRotate && Number.isNaN(posRotate[0])) {
-            console.log(1074, PP)
-            return
-          }
-          window.PP = { dx, dy, pr: posRotate ? [...posRotate] : null, k: [...K] }
           posRotate = posRotate ? vector4(posRotate, K) : K
           mainAnimate.push(posRotate)
 
@@ -1130,7 +1136,7 @@
       })
 
 
-      const swipers = document.querySelectorAll('.swiper')
+      const $swiper = document.querySelector('.swiper')
       const screen = window.screen
       const $height = screen.availHeight
       const $width = screen.availWidth
@@ -1141,131 +1147,179 @@
 
       const exhibit = new ACB($fixed.children[0], fixWidth / 5 | 0)
 
-      if (swipers) {
-        Array.prototype.forEach.call(swipers, $swiper => {
-          function setTranslate(border = false) {
-            if (border) {
-              distance = distance.toFixed(5) - 0
-            }
-            const isDown = distance > 0
-            const len = byChildren.length
-            const baseIndex = len / 2 | 0
-            const indexDelta = distance / baseWidth | 0
-            const offset = distance % baseWidth //c
-            const offsetBase = (fixWidth - baseWidth) / 2
-            const rate = fixWidth * offset / baseWidth
-            distance = offset
-            if (indexDelta) {
-              if (indexDelta > 0) {
-                byChildren.splice(0, 0, ...byChildren.splice(len - indexDelta, indexDelta))
-              } else {
-                byChildren.splice(len, 0, ...byChildren.splice(0, -indexDelta))
-              }
-            }
-            byChildren.forEach((item, index) => {
-              const scrollLayer = item.scrollLayer
-              const baseTop = (index - baseIndex) * baseWidth + (index < baseIndex ? -offsetBase : offsetBase)
-              if (isDown) {
-                if (index === baseIndex - 1) {
-                  const $scale = (baseWidth - offset + rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
-                } else if (index === baseIndex) {
-                  const $scale = (fixWidth + offset - rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
-                } else {
-                  const $scale = baseWidth / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
-                }
-              } else {
-                if (index === baseIndex + 1) {
-                  const $scale = (baseWidth + offset - rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
-                } else if (index === baseIndex) {
-                  const $scale = (fixWidth - offset + rate) / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
-                } else {
-                  const $scale = baseWidth / fixWidth
-                  scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
-                }
-              }
-            })
-            if (border) {
-              center.scrollLayer.classList.remove('center')
-              center = byChildren[baseIndex]
-              center.scrollLayer.classList.add('center')
+      if ($swiper) {
+        const setTranslate = function (border = false) {
+          if (border) {
+            distance = distance.toFixed(5) - 0
+          }
+          const isDown = distance > 0
+          const len = byChildren.length
+          const baseIndex = len / 2 | 0
+          const indexDelta = distance / baseWidth | 0
+          const offset = distance % baseWidth //c
+          const offsetBase = (fixWidth - baseWidth) / 2
+          const rate = fixWidth * offset / baseWidth
+          distance = offset
+          if (indexDelta) {
+            if (indexDelta > 0) {
+              byChildren.splice(0, 0, ...byChildren.splice(len - indexDelta, indexDelta))
+            } else {
+              byChildren.splice(len, 0, ...byChildren.splice(0, -indexDelta))
             }
           }
-
-          // const children = Array.from($swiper.children)
-          const byChildren = exhibit.getChildren()
-          let mode = 0 //0:scroll; 1:rotate; 2:move;
-          let center = byChildren[byChildren.length / 2 | 0]
-          setTranslate()
-          touch.register({
-            el: $byTouch,
-            move(pageX, pageY) {
-              if (mode === 0) {
-                distance += (pageY - this.pageY) * baseWidth * 2 / $height
-                setTranslate()
-              } else if (mode === 1) {
-                const dx = pageX - this.pageX
-                const dy = pageY - this.pageY
-                const k = getK(dx, dy, 20)
-                center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, k) : k
-                const [x, y, z, a] = center.rotateAngle
-                center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
-              }
-
-            },
-            async end() {
-              this.lock = true
-              if (mode === 0) {
-                if (distance > 0) {
-                  if (distance > baseWidth / 2) {
-                    await translation(baseWidth - distance, (dy, done) => {
-                      distance += dy
-                      setTranslate(done)
-                    }, 300, 0.5)
-                  } else {
-                    await translation(distance, (dy, done) => {
-                      distance -= dy
-                      setTranslate(done)
-                    }, 300, 0.5)
-                  }
-                } else if (distance < 0) {
-                  if (-distance > baseWidth / 2) {
-                    await translation(baseWidth + distance, (dy, done) => {
-                      distance -= dy
-                      setTranslate(done)
-                    }, 300, 0.5)
-                  } else {
-                    await translation(-distance, (dy, done) => {
-                      distance += dy
-                      setTranslate(done)
-                    }, 300, 0.5)
-                  }
-                }
-              }
-              this.lock = false
-            },
-            click: [2, function () {
-              mode = mode === 1 ? 0 : 1
-              if (mode === 1) {
-                center.scrollLayer.classList.remove('center')
-                center = byChildren[byChildren.length / 2 | 0]
-                center.scrollLayer.classList.add('center')
-                $ring.classList.add('active')
+          byChildren.forEach((item, index) => {
+            const scrollLayer = item.scrollLayer
+            const baseTop = (index - baseIndex) * baseWidth + (index < baseIndex ? -offsetBase : offsetBase)
+            if (isDown) {
+              if (index === baseIndex - 1) {
+                const $scale = (baseWidth - offset + rate) / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
+              } else if (index === baseIndex) {
+                const $scale = (fixWidth + offset - rate) / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
               } else {
-                center.scrollLayer.classList.remove('center')
-                $ring.classList.remove('active')
+                const $scale = baseWidth / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
               }
-            }],
-            press: [1000, function () {
-              mode = mode === 2 ? 0 : 2
-            }]
+            } else {
+              if (index === baseIndex + 1) {
+                const $scale = (baseWidth + offset - rate) / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
+              } else if (index === baseIndex) {
+                const $scale = (fixWidth - offset + rate) / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
+              } else {
+                const $scale = baseWidth / fixWidth
+                scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
+              }
+            }
           })
+          if (border) {
+            center.scrollLayer.classList.remove('center')
+            center = byChildren[baseIndex]
+            center.scrollLayer.classList.add('center')
+          }
+        }
+
+        const byMove = function (pageX, pageY) {
+          if (mode === 0) {
+            distance += (pageY - this.pageY) * baseWidth * 2 / $height
+            setTranslate()
+          } else if (mode === 1) {
+            const dx = pageX - this.pageX
+            const dy = pageY - this.pageY
+            const k = getK(dx, dy, 20)
+            center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, k) : k
+            const [x, y, z, a] = center.rotateAngle
+            center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+          }
+        }
+
+        const byEnd = async function () {
+          this.lock = true
+          if (mode === 0) {
+            if (distance > 0) {
+              if (distance > baseWidth / 2) {
+                await translation(baseWidth - distance, (dy, done) => {
+                  distance += dy
+                  setTranslate(done)
+                }, 300, 0.5)
+              } else {
+                await translation(distance, (dy, done) => {
+                  distance -= dy
+                  setTranslate(done)
+                }, 300, 0.5)
+              }
+            } else if (distance < 0) {
+              if (-distance > baseWidth / 2) {
+                await translation(baseWidth + distance, (dy, done) => {
+                  distance -= dy
+                  setTranslate(done)
+                }, 300, 0.5)
+              } else {
+                await translation(-distance, (dy, done) => {
+                  distance += dy
+                  setTranslate(done)
+                }, 300, 0.5)
+              }
+            }
+          }
+          this.lock = false
+        }
+
+        const byClick = function () {
+          mode = mode === 1 ? 0 : 1
+          if (mode === 1) {
+            center.scrollLayer.classList.remove('center')
+            center = byChildren[byChildren.length / 2 | 0]
+            center.scrollLayer.classList.add('center')
+            $ring.classList.add('active')
+          } else {
+            center.scrollLayer.classList.remove('center')
+            $ring.classList.remove('active')
+          }
+        }
+
+        const byPress = function () {
+          mode = mode === 2 ? 0 : 2
+        }
+
+        const byChildren = exhibit.getChildren()
+        let mode = 0 //0:scroll; 1:rotate; 2:move;
+        let center = byChildren[byChildren.length / 2 | 0]
+        setTranslate()
+        touch.register({
+          el: $byTouch,
+          move: byMove,
+          end: byEnd,
+          click: [2, byClick],
+          press: [1000, byPress]
+        })
+        if ($ringT) {
+          touch.register({
+            el: $ringT,
+            move: byMove,
+            end: byEnd,
+            click: [2, byClick],
+            press: [1000, byPress]
+          })
+        }
+      }
+      if ($ring) {
+        const { width: ringWidth, top: ringTop, left: ringLeft } = $ring.getBoundingClientRect()
+        const ringCenter = { top: ringTop + ringWidth / 2, left: ringLeft + ringWidth / 2 }
+        let ringStart = null
+        let ringAngle = 0
+        const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
+        touch.register({
+          el: $ring,
+          start() {
+            $ring.classList.add('touch')
+          },
+          move(pageX, pageY) {
+            if (!ringStart) {
+              ringStart = [pageX, pageY]
+              return
+            }
+            const currentAngle = Math.atan((pageY - ringCenter.top) / (pageX - ringCenter.left)) - Math.atan((ringStart[1] - ringCenter.top) / (ringStart[0] - ringCenter.left))
+            console.log(currentAngle)
+            ringAngle = currentAngle
+            $ring.style.transform = `rotate(${ringAngle}rad)`
+          },
+          end() {
+            $ring.classList.remove('touch')
+            ringStart = null
+            translation(ringAngle, a => {
+              ringAngle -= a
+              ringAnimate.push(ringAngle)
+            }, 500, 0.5).then(() => {
+              ringAnimate.stop()
+              $ring.style.transform = `rotate(0rad)`
+            })
+          }
         })
       }
+
 
       const shadow = {
         hub: {},

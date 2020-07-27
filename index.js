@@ -659,6 +659,7 @@ function v2q([u, v, w, a]) {
 }
 
 function vector4(q1, q2, direct) {
+  if (q2[3] === 0) return q1
   const [s, [x1, y1, z1]] = v2q(q1)
   const [t, [x2, y2, z2]] = direct ? v2q(q2) : v2q(rotVector(q2.slice(0, 3), q1.slice(0, 3).concat(-q1[3])).concat(q2[3]))
   const [ac, [u, v, w]] = [t * s - (x1 * x2 + y1 * y2 + z1 * z2), [t * x1 + s * x2 + y1 * z2 - y2 * z1, t * y1 + s * y2 + z1 * x2 - x1 * z2, t * z1 + s * z2 + x1 * y2 - x2 * y1]]

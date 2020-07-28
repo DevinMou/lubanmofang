@@ -15,6 +15,7 @@
       width: 100%;
       height: 100%;
       margin: 0;
+      background-color: #ffffff;
       touch-action: none;
     }
 
@@ -332,13 +333,21 @@
     }
 
     .ring {
-      visibility: hidden;
+      width: 6vw;
+      height: 22.5vw;
+      transform-origin: 15vw 50%;
+      position: absolute;
+      overflow: hidden;
+      top: calc(50% - 11.25vw);
+      left: 0;
+    }
+
+    .ring::before {
+      content: '';
+      display: block;
       width: 26vw;
       height: 26vw;
-      border-left: 2vw solid rgb(89 190 220 / 30%);
-      border-right: 2vw solid rgb(89 190 220 / 30%);
-      border-top: 2vw solid transparent;
-      border-bottom: 2vw solid transparent;
+      border: 2vw solid transparent;
       border-radius: 50%;
       transform-origin: center;
       position: absolute;
@@ -347,19 +356,16 @@
       left: 0;
     }
 
-    .ring-through {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
+    .ring.active::before {
+      border-left-color: rgb(89 190 220 / 30%);
     }
 
-    .ring.active {
-      visibility: visible;
-    }
-
-    .ring.active.touch {
+    .ring.active.touch::before {
       border-left-color: rgb(94 220 241 / 50%);
-      border-right-color: rgb(94 220 241 / 50%);
+    }
+
+    .ring.move::before {
+      border-left-color: rgb(253 187 67 / 50%);
     }
   </style>
   <style id="var-style">
@@ -398,7 +404,6 @@
     </div>
     <div class="deputy-touch">
       <div class="ring">
-        <div class="ring-through"></div>
       </div>
     </div>
   </div>
@@ -565,7 +570,7 @@
       this.upStyle('opacity', '0')
     }
     show() {
-      this.upStyle('opacity', this.style.opacity || '0.8')
+      this.upStyle('opacity', this.style.opacity || '1')
     }
   }
 
@@ -1036,7 +1041,6 @@
     ReactData.$mainTouch = document.querySelector('.main-touch')
     ReactData.$byTouch = document.querySelector('.deputy-touch')
     ReactData.$ring = document.querySelector('.ring')
-    ReactData.$ringT = document.querySelector('.ring-through')
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
@@ -1051,7 +1055,7 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $ringT } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring } = ReactData
     let r = 1
     let startPos = null
     // let posRotate = [75, -20]
@@ -1210,8 +1214,7 @@
             const dy = pageY - this.pageY
             const k = getK(dx, dy, 20)
             center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, k) : k
-            const [x, y, z, a] = center.rotateAngle
-            center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+            byAnimate.push(center.rotateAngle)
           }
         }
 
@@ -1253,16 +1256,36 @@
             center.scrollLayer.classList.remove('center')
             center = byChildren[byChildren.length / 2 | 0]
             center.scrollLayer.classList.add('center')
-            $ring.classList.add('active')
+            $ring.className = 'ring active'
           } else {
             center.scrollLayer.classList.remove('center')
-            $ring.classList.remove('active')
+            $ring.className = 'ring'
           }
         }
 
         const byPress = function () {
           mode = mode === 2 ? 0 : 2
+          if (mode === 2) {
+            $ring.className = 'ring move'
+            byAnimate.stop()
+            center.rotateAngle = center.rotateAngle || [0, 0, 1, 0]
+            const [[x, y, z, a], v0] = getCorrectRot(center.rotateAngle, deg2rot3d([0, -15], [1, -10]))
+            let countA = 0
+            translation(a, angle => {
+              countA += angle
+              const v = vector4(center.rotateAngle, [x, y, z, countA], true)
+              byAnimate.push(v[3] === 0 ? v0 : v)
+            }, 300, 0.5).then(() => center.rotateAngle = v0)
+          } else {
+            $ring.className = 'ring'
+          }
         }
+
+        function rotateMove(args) {
+          const [x, y, z, a] = args.last()
+          center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+        }
+        const byAnimate = new Animate(rotateMove)
 
         const byChildren = exhibit.getChildren()
         let mode = 0 //0:scroll; 1:rotate; 2:move;
@@ -1273,25 +1296,16 @@
           move: byMove,
           end: byEnd,
           click: [2, byClick],
-          press: [1000, byPress]
+          press: [500, byPress]
         })
-        if ($ringT) {
-          touch.register({
-            el: $ringT,
-            move: byMove,
-            end: byEnd,
-            click: [2, byClick],
-            press: [1000, byPress]
-          })
-        }
         if ($ring) {
-          const { width: ringWidth, top: ringTop, left: ringLeft } = $ring.getBoundingClientRect()
-          const ringCenter = { top: ringTop + ringWidth / 2, left: ringLeft + ringWidth / 2 }
+          const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
+          const ringCenter = { top: byHeight / 2, left: byLeft + byWidth / 2 }
           let ringStart = 0
           let ringAngle = 0
           const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
           const getTanAngle = (y, x) => {
-            return Math.PI - Math.atan2(-y, x)
+            return Math.PI - Math.atan2(y, x)
           }
           touch.register({
             el: $ring,
@@ -1300,14 +1314,36 @@
             },
             move(pageX, pageY) {
               if (!ringStart) {
-                ringStart = getTanAngle(pageY - ringCenter.top, pageX - ringCenter.left)
+                ringStart = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
                 return
               }
-              const currentAngle = getTanAngle(pageY - ringCenter.top, pageX - ringCenter.left)
-              const deltaAngle = currentAngle - ringStart
+              const currentAngle = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
+              let deltaAngle = currentAngle - ringStart
+              const pi = Math.PI
+              const range = [0, pi, pi, 2 * pi]
+              if (deltaAngle / 2 / pi > 0.7) {
+                deltaAngle -= 2 * pi
+              } else if (deltaAngle / 2 / pi < -0.7) {
+                deltaAngle += 2 * pi
+              }
               ringAngle += deltaAngle
+              if (ringAngle > pi) {
+                ringAngle -= 2 * pi
+              } else if (ringAngle < -pi) {
+                ringAngle += 2 * pi
+              }
               ringStart = currentAngle
-              console.log(ringAngle)
+              /* if (ringAngle > 2 * pi) {
+                ringAngle -= 2 * pi
+              } else if (ringAngle < -2 * pi) {
+                ringAngle += 2 * pi
+              }
+              const da = ringAngle >= 0 ? 1 : -1
+              let rr = da * ringAngle / pi * 2
+              rr = rr > 0 && (rr === (rr | 0)) ? rr - 1 : (rr | 0)
+              ringStart = currentAngle
+              console.log(ringAngle, range[rr] * -1 * da)
+              ringAngle += range[rr] * -1 * da */
               $ring.style.transform = `rotate(${ringAngle}rad)`
               if (deltaAngle) {
                 center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]
@@ -1324,6 +1360,7 @@
               }, 500, 0.5).then(() => {
                 ringAnimate.stop()
                 $ring.style.transform = `rotate(0rad)`
+                ringAngle = 0
               })
             }
           })
@@ -1372,7 +1409,7 @@
         [1013, 2002, 3000],
         [1040, 2440, 3400],
         [1720, 2000, 3000] */
-      ], ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'])
+      ], ['rgb(255 0 0 /80%)', 'rgb(255 165 0 /80%)', 'rgb(255 255 0 /80%)', 'rgb(0 128 0 /80%)', 'rgb(0 255 255 /80%)', 'rgb(0 0 255 /80%)', 'rgb(128 0 128 /80%)'])
       window.$ehb = exhibit
 
 

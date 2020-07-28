@@ -1284,40 +1284,51 @@
             press: [1000, byPress]
           })
         }
-      }
-      if ($ring) {
-        const { width: ringWidth, top: ringTop, left: ringLeft } = $ring.getBoundingClientRect()
-        const ringCenter = { top: ringTop + ringWidth / 2, left: ringLeft + ringWidth / 2 }
-        let ringStart = null
-        let ringAngle = 0
-        const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
-        touch.register({
-          el: $ring,
-          start() {
-            $ring.classList.add('touch')
-          },
-          move(pageX, pageY) {
-            if (!ringStart) {
-              ringStart = [pageX, pageY]
-              return
-            }
-            const currentAngle = Math.atan((pageY - ringCenter.top) / (pageX - ringCenter.left)) - Math.atan((ringStart[1] - ringCenter.top) / (ringStart[0] - ringCenter.left))
-            console.log(currentAngle)
-            ringAngle = currentAngle
-            $ring.style.transform = `rotate(${ringAngle}rad)`
-          },
-          end() {
-            $ring.classList.remove('touch')
-            ringStart = null
-            translation(ringAngle, a => {
-              ringAngle -= a
-              ringAnimate.push(ringAngle)
-            }, 500, 0.5).then(() => {
-              ringAnimate.stop()
-              $ring.style.transform = `rotate(0rad)`
-            })
+        if ($ring) {
+          const { width: ringWidth, top: ringTop, left: ringLeft } = $ring.getBoundingClientRect()
+          const ringCenter = { top: ringTop + ringWidth / 2, left: ringLeft + ringWidth / 2 }
+          let ringStart = 0
+          let ringAngle = 0
+          const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
+          const getTanAngle = (y, x) => {
+            return Math.PI - Math.atan(y, x)
           }
-        })
+          touch.register({
+            el: $ring,
+            start() {
+              $ring.classList.add('touch')
+            },
+            move(pageX, pageY) {
+              if (!ringStart) {
+                ringStart = getTanAngle(pageY - ringCenter.top, pageX - ringCenter.left)
+                return
+              }
+              const currentAngle = getTanAngle(pageY - ringCenter.top, pageX - ringCenter.left)
+              const deltaAngle = currentAngle - ringStart
+              ringAngle += deltaAngle
+              ringStart = currentAngle
+              console.log(deltaAngle)
+              $ring.style.transform = `rotate(${ringAngle}rad)`
+              if (deltaAngle) {
+                center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]
+                const [x, y, z, a] = center.rotateAngle
+                center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+              }
+            },
+            end() {
+              $ring.classList.remove('touch')
+              ringStart = null
+              translation(ringAngle, a => {
+                ringAngle -= a
+                ringAnimate.push(ringAngle)
+              }, 500, 0.5).then(() => {
+                ringAnimate.stop()
+                $ring.style.transform = `rotate(0rad)`
+              })
+            }
+          })
+        }
+
       }
 
 

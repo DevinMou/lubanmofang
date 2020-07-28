@@ -1291,7 +1291,7 @@
           let ringAngle = 0
           const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
           const getTanAngle = (y, x) => {
-            return Math.PI - Math.atan(y, x)
+            return Math.PI - Math.atan2(-y, x)
           }
           touch.register({
             el: $ring,
@@ -1307,7 +1307,7 @@
               const deltaAngle = currentAngle - ringStart
               ringAngle += deltaAngle
               ringStart = currentAngle
-              console.log(deltaAngle)
+              console.log(ringAngle)
               $ring.style.transform = `rotate(${ringAngle}rad)`
               if (deltaAngle) {
                 center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]

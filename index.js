@@ -13,6 +13,7 @@ Array.prototype.numSort = function () {
 function createPoint() {
   const points = {}
   const letters = {}
+  const coordinates = {}
   const er = [4, 2, 1]
   for (let i = 1; i < 4; i++) {
     for (let j = 2; j >= 0; j--) {
@@ -20,15 +21,18 @@ function createPoint() {
         let point = i * 1000 + er[h] * 10 ** j
         let letter = ((i - 1) * 9 + (2 - j) * 3 + h + 9).toString(36)
         letters[letter] = point
-        points[point] = getEdge(i, j, er[h], points, letter)
+        const coordinate = [h - 1, j - 1, 2 - i]
+        coordinates[coordinate.join('')] = point
+        points[point] = getEdge(i, j, er[h], points, letter, coordinate)
       }
     }
   }
   return [points, letters]
 }
 
-function getEdge(floor, site, num, points, str) {
+function getEdge(floor, site, num, points, str, coordinate) {
   const res = Object.defineProperty({}, 'chart', { value: str })
+  Object.defineProperty(res, 'coordinate', { value: coordinate })
   let floors = floor === 1 ? [2] : floor === 2 ? [1, 3] : [2]
   let sites = site === 0 ? [1] : site === 1 ? [0, 2] : [1]
   let nums = num === 4 ? [2] : num === 2 ? [4, 1] : [2]
@@ -763,4 +767,48 @@ function Cramer(...arrs) {
     })
     return res
   }
+}
+
+function matrixMultiplic(m1, m2) {
+  function getCR(m) {
+    if (!Array.isArray(m)) return false
+    const row = m.length
+    if (row === 0) return false
+    let col
+    for (let item of m) {
+      if (!Array.isArray(item)) return false
+      if (col === undefined) {
+        col = item.length
+      } else if (col !== item.length) {
+        return false
+      }
+      if (col === 0) return false
+    }
+    return [col, row]
+  }
+  const m1cr = getCR(m1)
+  const m2cr = getCR(m2)
+  if (m1cr && m2cr && m1cr[0] === m2cr[1]) {
+    const res = []
+    const p = m1cr[0]
+    for (let i = 0; i < m1cr[1]; i++) {
+      res[i] = res[i] || []
+      for (let j = 0; j < m2cr[0]; j++) {
+        res[i][j] = 0
+        for (let k = 0; k < p; k++) {
+          res[i][j] += m1[i][k] * m2[k][j]
+        }
+      }
+    }
+    return res
+  } else {
+    return false
+  }
+}
+
+function coordinateExchangeRule(v) {
+  const [a, [b, c, d]] = v2q(v)
+  const m1 = [[1 - 2 * c ** 2 - 2 * d ** 2, 2 * b * c - 2 * a * d, 2 * a * c + 2 * b * d], [2 * b * c + 2 * a * d, 1 - 2 * b ** 2 - 2 * d ** 2, 2 * c * d - 2 * a * b], [2 * b * d - 2 * a * c, 2 * a * b + 2 * c * d, 1 - 2 * b ** 2 - 2 * c ** 2]]
+  const res = matrixMultiplic(m1, [[0], [1], [2]])
+  return res.map(item => +item[0].toFixed(0))
 }

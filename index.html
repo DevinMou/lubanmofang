@@ -332,6 +332,34 @@
       left: 0;
     }
 
+    .roulette {
+      position: absolute;
+      width: 30vw;
+      height: 30vw;
+      left: 0;
+      top: calc(50% - 15vw);
+      border-radius: 50%;
+      overflow: hidden;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .roulette.active {
+      pointer-events: unset;
+    }
+
+    .roulette.active::before {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 20vw;
+      height: 20vw;
+      border-radius: 50%;
+      background-color: rgb(255 255 255 .3);
+    }
+
     .ring {
       width: 6vw;
       height: 22.5vw;
@@ -403,6 +431,7 @@
     <div class="swiper">
     </div>
     <div class="deputy-touch">
+      <div class="roulette"></div>
       <div class="ring">
       </div>
     </div>
@@ -877,7 +906,7 @@
             touch.events.lastDate = nowDate
             this.touches[identifier] = touch
             if (events.start) {
-              events.start.bind(touch)()
+              events.start.bind(touch)(pageX, pageY)
             }
             if (events.press) {
               const timeArr = Object.keys(events.press)
@@ -1041,6 +1070,7 @@
     ReactData.$mainTouch = document.querySelector('.main-touch')
     ReactData.$byTouch = document.querySelector('.deputy-touch')
     ReactData.$ring = document.querySelector('.ring')
+    ReactData.$roulette = document.querySelector('.roulette')
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
@@ -1055,7 +1085,7 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette } = ReactData
     let r = 1
     let startPos = null
     // let posRotate = [75, -20]
@@ -1150,7 +1180,6 @@
       let distance = 0
 
       const exhibit = new ACB($fixed.children[0], fixWidth / 5 | 0)
-
       if ($swiper) {
         const setTranslate = function (border = false) {
           if (border) {
@@ -1276,8 +1305,10 @@
               const v = vector4(center.rotateAngle, [x, y, z, countA], true)
               byAnimate.push(v[3] === 0 ? v0 : v)
             }, 300, 0.5).then(() => center.rotateAngle = v0)
+            $roulette.classList.add('active')
           } else {
             $ring.className = 'ring'
+            $roulette.classList.remove('active')
           }
         }
 
@@ -1298,9 +1329,11 @@
           click: [2, byClick],
           press: [500, byPress]
         })
+
+        const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
+        const ringCenter = { top: byHeight / 2, left: byLeft + byWidth / 2 }
+
         if ($ring) {
-          const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
-          const ringCenter = { top: byHeight / 2, left: byLeft + byWidth / 2 }
           let ringStart = 0
           let ringAngle = 0
           const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
@@ -1362,6 +1395,14 @@
                 $ring.style.transform = `rotate(0rad)`
                 ringAngle = 0
               })
+            }
+          })
+        }
+        if ($roulette) {
+          touch.register({
+            el: $roulette,
+            start(pageX, pageY) {
+
             }
           })
         }

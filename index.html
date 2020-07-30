@@ -158,6 +158,11 @@
       height: 100%;
     }
 
+    .entity {
+      transform-style: preserve-3d;
+      transform: scale(0.999);
+    }
+
     .zft {
       position: absolute;
       left: 0;
@@ -194,6 +199,10 @@
 
     .zft span:nth-child(5) {
       transform: translateY(100%) rotateX(90deg);
+    }
+
+    .zft span:nth-child(6) {
+      transform: translateZ(1em);
     }
 
     /*[down:b,r,back:t,r,right:b,r,left:t,l,front:b,l,top:t,l]*/
@@ -432,9 +441,9 @@
       transform: translate3d(-50%, -50%, -30px);
     }
 
-    .zft span:nth-child(6) {
+    /* .zft span:nth-child(6) {
       transform: translateZ(60px);
-    }
+    } */
   </style>
 </head>
 
@@ -467,7 +476,7 @@
 </body>
 <script src="./index.js"></script>
 <script>
-  const ReactData = new Proxy({ size: 60 }, {
+  const ReactData = new Proxy({ size: 60, resizeQuene: [] }, {
     set(target, propKey, value) {
       switch (propKey) {
         case 'size':
@@ -494,6 +503,17 @@
       return true
     }
   })
+  ReactData.bindResizeDate = function (args, fn) {
+    this.resizeQuene.push([args, fn])
+    const res = fn()
+    args.forEach((item, index) => this[item] = res[index])
+  }
+  ReactData.resize = function () {
+    this.resizeQuene.forEach(item$ => {
+      const res = item$[1]()
+      item$[0].forEach((item, index) => this[item] = res[index])
+    })
+  }
   class SmallCube {
     constructor(parentNode, site = [0, 0, 0], size = ReactData.size) {
       const _this = this
@@ -560,12 +580,13 @@
       obj = obj || {}
       obj.width = obj.width || this.size
       obj.height = obj.height || this.size
+      obj['font-size'] = obj['font-size'] || this.size
       obj.transform = obj.transform || { translate: [] }
       for (let name in obj) {
         const value = obj[name]
         const tp = typeof value
         switch (name) {
-          case 'width': case 'height':
+          case 'width': case 'height': case 'font-size':
             if (tp === 'number') {
               obj[name] = value + 'px'
             } else if (tp !== 'stirng') {
@@ -595,7 +616,7 @@
     changeSize(size) {
       if (size !== this.size) {
         this.size = size
-        this.el.children[5].style.transform = `translateZ(${this.size}px)`
+        // this.el.children[5].style.transform = `translateZ(${this.size}px)`
       }
     }
     createEl() {
@@ -606,9 +627,9 @@
       zft.style = this.styleobj2str()
       for (let i = 0; i < 6; i++) {
         const span = document.createElement('span')
-        if (i === 5) {
+        /* if (i === 5) {
           span.style.transform = `translateZ(${this.size}px)`
-        }
+        } */
         zft.appendChild(span)
       }
       this.el = zft
@@ -639,16 +660,21 @@
       this.offset = [0, 0, 0]
       this.size = size
       this.rotateAngle = null //x,y,z
-      const part = document.createElement('div')
-      part.className = 'part'
-      this.scrollLayer = part
-      const partView = document.createElement('div')
-      partView.className = 'part-perspective'
-      this.perspectiveLayer = partView
-      this.containerLayer = parentNode
-      partView.appendChild(parentNode)
-      part.appendChild(partView)
-      documentFragment.appendChild(part)
+      if (documentFragment === undefined) {
+        this.containerLayer = parentNode
+      } else {
+        const part = document.createElement('div')
+        part.className = 'part'
+        this.scrollLayer = part
+        const partView = document.createElement('div')
+        partView.className = 'part-perspective'
+        this.perspectiveLayer = partView
+        this.containerLayer = parentNode
+        partView.appendChild(parentNode)
+        part.appendChild(partView)
+        documentFragment.appendChild(part)
+      }
+
       // this.parentNode = partContainer
       /* numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
         a.forEach((b, bi) => {
@@ -782,11 +808,12 @@
   }
 
   class Animate {
-    constructor(fn) {
+    constructor(fn, direct) {
       this.pool = []
       this.fn = fn
       this.active = false
       this.running = false
+      this.direct = direct
     }
     push(payload) {
       this.running = true
@@ -806,7 +833,7 @@
       const args = [...this.pool]
       this.pool.length = 0
       if (this.running) {
-        this.fn(args)
+        this.fn(this.direct ? args.last() : args)
         this.active = false
         this.check()
       } else {
@@ -1115,6 +1142,9 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
+    window.onresize = function (event) {
+      ReactData.resize()
+    }
     const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette, $contact, $rocker } = ReactData
     let r = 1
     let startPos = null
@@ -1336,6 +1366,7 @@
               byAnimate.push(v[3] === 0 ? v0 : v)
             }, 300, 0.5).then(() => center.rotateAngle = v0)
             $roulette.classList.add('active')
+            console.log(center)
           } else {
             $ring.className = 'ring'
             $roulette.classList.remove('active')
@@ -1360,9 +1391,10 @@
           press: [500, byPress]
         })
 
-        const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
-        const ringCenter = { top: byHeight / 2, left: byLeft + byWidth / 2 }
-
+        ReactData.bindResizeDate(['byWidth', 'ringCenter'], () => {
+          const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
+          return [byWidth, { top: byHeight / 2, left: byLeft + byWidth / 2 }]
+        })
         if ($ring) {
           let ringStart = 0
           let ringAngle = 0
@@ -1435,13 +1467,48 @@
           })
         }
         if ($roulette) {
+          const rockerSite = [0, 0]
+          const rockerTranslate = (pageX, pageY) => {
+            const rockerMaxLen = ReactData.byWidth * 8 / 30 - 2
+            const offsetX = pageX - ReactData.ringCenter.left
+            const offsetY = pageY - ReactData.ringCenter.top
+            const rate = ((offsetX ** 2 + offsetY ** 2) / rockerMaxLen ** 2) ** 0.5
+            if (rate > 1) {
+              return [offsetX / rate, offsetY / rate, rate]
+            } else {
+              return [offsetX, offsetY, rate]
+            }
+          }
+          const rockerAnimate = new Animate(([px, py, r]) => {
+            rockerSite[0] = px
+            rockerSite[1] = py
+            r = r > 1 ? 1 : r
+            const a = Math.PI / 2 - Math.atan2(-py, px)
+            $contact.style.transform = `rotate(${a}rad) translateY(${-25 + (15 * r)}px)`
+            $rocker.style.transform = `translate(${px}px,${py}px)`
+          }, true)
           touch.register({
             el: $roulette,
             start(pageX, pageY) {
-              $rocker.style.transform = `translate(${pageX - ringCenter.left}px,${pageY - ringCenter.top}px)`
+              $roulette.classList.add('touch')
+              rockerAnimate.push(rockerTranslate(pageX, pageY))
             },
             move(pageX, pageY) {
-
+              rockerAnimate.push(rockerTranslate(pageX, pageY))
+            },
+            end() {
+              let R = 1
+              $roulette.classList.remove('touch')
+              translation(1, r => {
+                R -= r
+                rockerAnimate.push([rockerSite[0] * R, rockerSite[1] * R, R])
+              }, 200, 0).then(() => {
+                rockerAnimate.stop()
+                $contact.style.transform = `rotate(0) translateY(-25px)`
+                $rocker.style.transform = `translate(0,0)`
+                rockerSite[0] = 0
+                rockerSite[1] = 0
+              })
             }
           })
         }
@@ -1481,19 +1548,18 @@
       $ct.children[1].appendChild(df)
       shadow.init()
       shadow.render()
-      exhibit.load([-1, 3, 6, 2, 5, 4, 1
-        /* [1000, 2000, 3170],
-        [1000, 2011, 3003],
-        [1000, 2320, 3200],
-        [1004, 2004, 3004],
-        [1013, 2002, 3000],
-        [1040, 2440, 3400],
-        [1720, 2000, 3000] */
-      ], ['rgb(255 0 0 /80%)', 'rgb(255 165 0 /80%)', 'rgb(255 255 0 /80%)', 'rgb(0 128 0 /80%)', 'rgb(0 255 255 /80%)', 'rgb(0 0 255 /80%)', 'rgb(128 0 128 /80%)'])
+      exhibit.load([-1, 3, 6, 2, 5, 4, 1], ['rgb(255 0 0 /80%)', 'rgb(255 165 0 /80%)', 'rgb(255 255 0 /80%)', 'rgb(0 128 0 /80%)', 'rgb(0 255 255 /80%)', 'rgb(0 0 255 /80%)', 'rgb(128 0 128 /80%)'])
       window.$ehb = exhibit
 
-
-
+      const pdf = document.createDocumentFragment()
+      const projection = {
+        block: new Block(Array.from(Array(4), () => new SmallCube(pdf)), [], ReactData.size, $ct.children[0]),
+        render(numArr, color) {
+          this.block.init(numArr, color)
+        }
+      }
+      $ct.children[0].appendChild(pdf)
+      projection.render([1040, 1020, 1004, 2004], 'red')
       // 创建操作区
       /* function createOperationBlocks(num, blocks) {
         const ob = document.createElement('div')

@@ -334,30 +334,55 @@
 
     .roulette {
       position: absolute;
-      width: 30vw;
-      height: 30vw;
-      left: 0;
-      top: calc(50% - 15vw);
+      width: 26vw;
+      height: 26vw;
+      left: 2vw;
+      top: calc(50% - 13vw);
       border-radius: 50%;
       overflow: hidden;
-      pointer-events: none;
+      /* pointer-events: none; */
+      visibility: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     .roulette.active {
-      pointer-events: unset;
+      /* pointer-events: unset; */
+      visibility: visible;
+      box-shadow: inset 0 0 5px 0px rgb(49 82 90 / 10%);
+      background: rgb(187 187 187 / 7%);
     }
 
-    .roulette.active::before {
-      content: '';
+    .roulette.active.touch {
+      box-shadow: inset 0 0 5px 0px rgb(56 216 255 / 18%);
+    }
+
+    .rocker {
       display: block;
       position: absolute;
-      width: 20vw;
-      height: 20vw;
+      width: 10vw;
+      height: 10vw;
       border-radius: 50%;
-      background-color: rgb(255 255 255 .3);
+      background-color: rgb(47 66 74 / 41%)
+    }
+
+    .roulette.active.touch .rocker {
+      box-shadow: 0 0 10px 0 #59d0fb9c;
+    }
+
+    .contact {
+      position: absolute;
+      transform-origin: center 13vw;
+      transform: rotate(0deg) translateY(-25px);
+      display: block;
+      top: 0px;
+      left: -7vw;
+      width: 40vw;
+      border-radius: 50%;
+      height: 40vw;
+      background: transparent;
+      box-shadow: inset 0 5px 15px 5px #32c1ea;
     }
 
     .ring {
@@ -431,7 +456,10 @@
     <div class="swiper">
     </div>
     <div class="deputy-touch">
-      <div class="roulette"></div>
+      <div class="roulette">
+        <div class="contact"></div>
+        <div class="rocker"></div>
+      </div>
       <div class="ring">
       </div>
     </div>
@@ -1071,6 +1099,8 @@
     ReactData.$byTouch = document.querySelector('.deputy-touch')
     ReactData.$ring = document.querySelector('.ring')
     ReactData.$roulette = document.querySelector('.roulette')
+    ReactData.$contact = document.querySelector('.contact')
+    ReactData.$rocker = document.querySelector('.rocker')
     ReactData.$pb = document.querySelector('.perspective')
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
@@ -1085,7 +1115,7 @@
     document.oncontextmenu = function (event) {
       event.preventDefault()
     }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette, $contact, $rocker } = ReactData
     let r = 1
     let startPos = null
     // let posRotate = [75, -20]
@@ -1343,58 +1373,64 @@
           touch.register({
             el: $ring,
             start() {
-              $ring.classList.add('touch')
+              if (mode === 1) {
+                $ring.classList.add('touch')
+              }
             },
             move(pageX, pageY) {
-              if (!ringStart) {
-                ringStart = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
-                return
-              }
-              const currentAngle = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
-              let deltaAngle = currentAngle - ringStart
-              const pi = Math.PI
-              const range = [0, pi, pi, 2 * pi]
-              if (deltaAngle / 2 / pi > 0.7) {
-                deltaAngle -= 2 * pi
-              } else if (deltaAngle / 2 / pi < -0.7) {
-                deltaAngle += 2 * pi
-              }
-              ringAngle += deltaAngle
-              if (ringAngle > pi) {
-                ringAngle -= 2 * pi
-              } else if (ringAngle < -pi) {
-                ringAngle += 2 * pi
-              }
-              ringStart = currentAngle
-              /* if (ringAngle > 2 * pi) {
-                ringAngle -= 2 * pi
-              } else if (ringAngle < -2 * pi) {
-                ringAngle += 2 * pi
-              }
-              const da = ringAngle >= 0 ? 1 : -1
-              let rr = da * ringAngle / pi * 2
-              rr = rr > 0 && (rr === (rr | 0)) ? rr - 1 : (rr | 0)
-              ringStart = currentAngle
-              console.log(ringAngle, range[rr] * -1 * da)
-              ringAngle += range[rr] * -1 * da */
-              $ring.style.transform = `rotate(${ringAngle}rad)`
-              if (deltaAngle) {
-                center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]
-                const [x, y, z, a] = center.rotateAngle
-                center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+              if (mode === 1) {
+                if (!ringStart) {
+                  ringStart = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
+                  return
+                }
+                const currentAngle = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
+                let deltaAngle = currentAngle - ringStart
+                const pi = Math.PI
+                const range = [0, pi, pi, 2 * pi]
+                if (deltaAngle / 2 / pi > 0.7) {
+                  deltaAngle -= 2 * pi
+                } else if (deltaAngle / 2 / pi < -0.7) {
+                  deltaAngle += 2 * pi
+                }
+                ringAngle += deltaAngle
+                if (ringAngle > pi) {
+                  ringAngle -= 2 * pi
+                } else if (ringAngle < -pi) {
+                  ringAngle += 2 * pi
+                }
+                ringStart = currentAngle
+                /* if (ringAngle > 2 * pi) {
+                  ringAngle -= 2 * pi
+                } else if (ringAngle < -2 * pi) {
+                  ringAngle += 2 * pi
+                }
+                const da = ringAngle >= 0 ? 1 : -1
+                let rr = da * ringAngle / pi * 2
+                rr = rr > 0 && (rr === (rr | 0)) ? rr - 1 : (rr | 0)
+                ringStart = currentAngle
+                console.log(ringAngle, range[rr] * -1 * da)
+                ringAngle += range[rr] * -1 * da */
+                $ring.style.transform = `rotate(${ringAngle}rad)`
+                if (deltaAngle) {
+                  center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]
+                  const [x, y, z, a] = center.rotateAngle
+                  center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+                }
               }
             },
             end() {
-              $ring.classList.remove('touch')
-              ringStart = null
-              translation(ringAngle, a => {
-                ringAngle -= a
-                ringAnimate.push(ringAngle)
-              }, 500, 0.5).then(() => {
-                ringAnimate.stop()
-                $ring.style.transform = `rotate(0rad)`
-                ringAngle = 0
-              })
+              if (mode === 1) {
+                $ring.classList.remove('touch')
+                ringStart = null
+                translation(ringAngle, a => {
+                  ringAngle -= a
+                  ringAnimate.push(ringAngle)
+                }, 500, 0.5).then(() => {
+                  ringAnimate.stop()
+                  $ring.style.transform = `rotate(0rad)`
+                  ringAngle = 0
+                })
+              }
             }
           })
         }
@@ -1402,6 +1438,9 @@
           touch.register({
             el: $roulette,
             start(pageX, pageY) {
+              $rocker.style.transform = `translate(${pageX - ringCenter.left}px,${pageY - ringCenter.top}px)`
+            },
+            move(pageX, pageY) {
 
             }
           })

@@ -703,6 +703,9 @@
         this.hub[item] = cube
         cube.site = point2site(item)
       })
+      if (numArr.length === 3 && this.hub[3]) {
+        this.hub[3].hide()
+      }
     }
     setColor(color) {
       this.bgColor = color
@@ -1376,11 +1379,13 @@
                 return c[item * d] * d
               })
             }
+            const aaa = []
             const n1 = Object.keys(center.hub).map(point => {
               const coor = points[point].coordinate
+              aaa.push([point, coor])
               return coordinates[transformCoordinate(coor, c1).join('')]
             })
-            console.log(n1)
+            console.log(aaa, c1, n1)
             projection.render(n1, center.bgColor)
           } else {
             $ring.className = 'ring'

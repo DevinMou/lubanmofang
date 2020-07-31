@@ -27,7 +27,7 @@ function createPoint() {
       }
     }
   }
-  return [points, letters]
+  return [points, letters, coordinates]
 }
 
 function getEdge(floor, site, num, points, str, coordinate) {
@@ -257,7 +257,7 @@ function equl(allArr, a0, shape) {
   }
 }
 
-const [points, letters] = createPoint()
+const [points, letters, coordinates] = createPoint()
 const allArr = { count: 0, shape: {} }
 const path = []
 console.time('lb')
@@ -725,9 +725,10 @@ function getCorrectRot(k, k0) {
     }
 
   }
-  const k1 = vector4(correct(k), k0)
+  const c1 = correct(k)
+  const k1 = vector4(c1, k0)
   const v1 = vectorReverse(k, k1)
-  return [v1, k1]
+  return [v1, k1, c1]
 }
 
 function deg2rot3d(...payload) {

@@ -759,6 +759,7 @@
   class ACB { // assemble cube
     constructor(el, size) {// num = 27|4|3
       this.blocks = []
+      this.list = null
       const df = document.createDocumentFragment()
       for (let i = 0; i < 7; i++) {
         const block = []
@@ -773,6 +774,7 @@
     }
     load(data, colors, noHide) {
       this.show()
+      this.list = [...data]
       let p3
       const res = data.map(item => {
         // return { offset: bulks[item].offset, points: block2points(bulks[item].points) }
@@ -1215,8 +1217,8 @@
         end() {
           if (this.status === TouchEvent.STATUS_DOWN) return
           mainAnimate.stop()
-          const [[x, y, z, a], v0] = getCorrectRot(posRotate, deg2rot3d([0, -15], [1, -10]))
-
+          const [[x, y, z, a], v0, c0] = getCorrectRot(posRotate, deg2rot3d([0, -15], [1, -10]))
+          ReactData.mainQuadrature = [...c0]
           // rotateMove([vector4(posRotate, [x, y, z, a])])
           let countA = 0
           translation(a, (angle) => {
@@ -1358,7 +1360,7 @@
             $ring.className = 'ring move'
             byAnimate.stop()
             center.rotateAngle = center.rotateAngle || [0, 0, 1, 0]
-            const [[x, y, z, a], v0] = getCorrectRot(center.rotateAngle, deg2rot3d([0, -15], [1, -10]))
+            const [[x, y, z, a], v0, c0] = getCorrectRot(center.rotateAngle, deg2rot3d([0, -15], [1, -10]))
             let countA = 0
             translation(a, angle => {
               countA += angle
@@ -1366,7 +1368,20 @@
               byAnimate.push(v[3] === 0 ? v0 : v)
             }, 300, 0.5).then(() => center.rotateAngle = v0)
             $roulette.classList.add('active')
-            console.log(center)
+            const c1 = coordinateExchangeRule(c0)
+            const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
+            const transformCoordinate = (c, t) => {
+              return t.map(item => {
+                const d = Object.is(item, -0) ? -1 : item < 0 ? -1 : 1
+                return c[item * d] * d
+              })
+            }
+            const n1 = Object.keys(center.hub).map(point => {
+              const coor = points[point].coordinate
+              return coordinates[transformCoordinate(coor, c1).join('')]
+            })
+            console.log(n1)
+            projection.render(n1, center.bgColor)
           } else {
             $ring.className = 'ring'
             $roulette.classList.remove('active')
@@ -1412,10 +1427,10 @@
             move(pageX, pageY) {
               if (mode === 1) {
                 if (!ringStart) {
-                  ringStart = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
+                  ringStart = getTanAngle(ReactData.ringCenter.top - pageY, pageX - ReactData.ringCenter.left)
                   return
                 }
-                const currentAngle = getTanAngle(ringCenter.top - pageY, pageX - ringCenter.left)
+                const currentAngle = getTanAngle(ReactData.ringCenter.top - pageY, pageX - ReactData.ringCenter.left)
                 let deltaAngle = currentAngle - ringStart
                 const pi = Math.PI
                 const range = [0, pi, pi, 2 * pi]
@@ -1559,7 +1574,7 @@
         }
       }
       $ct.children[0].appendChild(pdf)
-      projection.render([1040, 1020, 1004, 2004], 'red')
+      // projection.render([1040, 1020, 1004, 2004], 'red')
       // 创建操作区
       /* function createOperationBlocks(num, blocks) {
         const ob = document.createElement('div')

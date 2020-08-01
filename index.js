@@ -807,9 +807,9 @@ function matrixMultiplic(m1, m2) {
   }
 }
 
-function coordinateExchangeRule(v) {
+function coordinateExchangeRule(v, u) {
   const [a, [b, c, d]] = v2q(v)
   const m1 = [[1 - 2 * c ** 2 - 2 * d ** 2, 2 * b * c - 2 * a * d, 2 * a * c + 2 * b * d], [2 * b * c + 2 * a * d, 1 - 2 * b ** 2 - 2 * d ** 2, 2 * c * d - 2 * a * b], [2 * b * d - 2 * a * c, 2 * a * b + 2 * c * d, 1 - 2 * b ** 2 - 2 * c ** 2]]
-  const res = matrixMultiplic(m1, [[0], [1], [2]])
+  const res = matrixMultiplic(m1, [[u[0]], [u[1]], [u[2]]])
   return res.map(item => +item[0].toFixed(0))
 }

@@ -39,8 +39,6 @@
       background: transparent;
       width: 100%;
       height: 100%;
-      perspective-origin: center;
-      transform: rotateX(-15deg) rotateY(-10deg);
     }
 
     .perspective::before {
@@ -104,34 +102,6 @@
       top: calc(50vh - 15vw);
     }
 
-    /* .fixed .swiper>div:nth-child(1) {
-      background: red;
-    }
-
-    .fixed .swiper>div:nth-child(2) {
-      background: orange;
-    }
-
-    .fixed .swiper>div:nth-child(3) {
-      background: yellow;
-    }
-
-    .fixed .swiper>div:nth-child(4) {
-      background: green;
-    }
-
-    .fixed .swiper>div:nth-child(5) {
-      background: cyan;
-    }
-
-    .fixed .swiper>div:nth-child(6) {
-      background: blue;
-    }
-
-    .fixed .swiper>div:nth-child(7) {
-      background: purple;
-    } */
-
     .background-board {
       position: absolute;
       left: 0;
@@ -156,6 +126,16 @@
       left: 0;
       width: 100%;
       height: 100%;
+    }
+
+    .virtual .main-rotation {
+      transform-style: preserve-3d;
+      transform: rotateX(-15deg) rotateY(-10deg);
+    }
+
+    .virtual .main-container {
+      transform-style: preserve-3d;
+      transform: translateZ(-30px)
     }
 
     .entity {
@@ -452,8 +432,18 @@
     <div class="perspective">
       <div class="background-board"></div>
       <div class="container">
-        <div class="entity"></div>
-        <div class="virtual"></div>
+        <div class="local">
+          <div class="main-translate">
+            <div class="main-rotation">
+              <div class="main-container"></div>
+            </div>
+          </div>
+        </div>
+        <div class="virtual">
+          <div class="main-rotation">
+            <div class="main-container"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="main-touch">
@@ -689,6 +679,7 @@
       //this.setHideFace(bgColor, noHide)
     }
     init(numArr, bgColor, noHide, offset) {
+      this.clear()
       if (offset !== undefined) {
         this.offset = offset || [0, 0, 0]
         this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0] * this.size}px),calc(-50% + ${this.offset[1] * this.size}px),${((1 + this.offset[2]) * this.size)}px)`
@@ -703,12 +694,18 @@
         this.hub[item] = cube
         cube.site = point2site(item)
       })
-      if (numArr.length === 3 && this.hub[3]) {
-        this.hub[3].hide()
+      if (numArr.length === 3 && this.cubes[3]) {
+        this.cubes[3].hide()
       }
     }
     setColor(color) {
       this.bgColor = color
+    }
+    clear() {
+      for (let point in this.hub) {
+        this.hub[point].hideFace = {}
+        delete this.hub[point]
+      }
     }
     setHideFace(color, noHide) {
       for (let point in this.hub) {
@@ -1137,6 +1134,16 @@
     ReactData.$ct = document.querySelector('.container')
     ReactData.$varStyle = document.querySelector('#var-style')
     ReactData.$fixed = document.querySelector('.fixed')
+    ReactData.$local = {
+      translate: document.querySelector('.local .main-translate'),
+      rotation: document.querySelector('.local .main-rotation'),
+      container: document.querySelector('.local .main-container'),
+    }
+    ReactData.$virtual = {
+      translate: document.querySelector('.virtual .main-translate'),
+      rotation: document.querySelector('.virtual .main-rotation'),
+      container: document.querySelector('.virtual .main-container'),
+    }
     const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled
     let isFullscreen = false
     document.body.onfullscreenchange = function (event) {
@@ -1150,7 +1157,7 @@
     window.onresize = function (event) {
       ReactData.resize()
     }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette, $contact, $rocker } = ReactData
+    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette, $contact, $rocker, $local, $virtual } = ReactData
     let r = 1
     let startPos = null
     // let posRotate = [75, -20]
@@ -1182,7 +1189,7 @@
     function rotateMove(args) {
       // const [x, y, z, a] = args.reduce((a, b) => a + b)
       const [x, y, z, a] = args.last()
-      $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+      $virtual.rotat.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
       // $info.innerText = `x:${x.toFixed(3)},  y${y.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
     }
     const mainAnimate = new Animate(rotateMove)
@@ -1371,21 +1378,11 @@
               byAnimate.push(v[3] === 0 ? v0 : v)
             }, 300, 0.5).then(() => center.rotateAngle = v0)
             $roulette.classList.add('active')
-            const c1 = coordinateExchangeRule(c0)
-            const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
-            const transformCoordinate = (c, t) => {
-              return t.map(item => {
-                const d = Object.is(item, -0) ? -1 : item < 0 ? -1 : 1
-                return c[item * d] * d
-              })
-            }
-            const aaa = []
+            // const c1 = coordinateExchangeRule(c0)
+            // const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
             const n1 = Object.keys(center.hub).map(point => {
-              const coor = points[point].coordinate
-              aaa.push([point, coor])
-              return coordinates[transformCoordinate(coor, c1).join('')]
+              return coordinates[coordinateExchangeRule(c0, points[point].coordinate).join('')]
             })
-            console.log(aaa, c1, n1)
             projection.render(n1, center.bgColor)
           } else {
             $ring.className = 'ring'
@@ -1565,7 +1562,7 @@
         }
       }
       // shadow.hub['3001'] = new SmallCube(df, [0, 2, 2])
-      $ct.children[1].appendChild(df)
+      $virtual.container.appendChild(df)
       shadow.init()
       shadow.render()
       exhibit.load([-1, 3, 6, 2, 5, 4, 1], ['rgb(255 0 0 /80%)', 'rgb(255 165 0 /80%)', 'rgb(255 255 0 /80%)', 'rgb(0 128 0 /80%)', 'rgb(0 255 255 /80%)', 'rgb(0 0 255 /80%)', 'rgb(128 0 128 /80%)'])
@@ -1578,7 +1575,7 @@
           this.block.init(numArr, color)
         }
       }
-      $ct.children[0].appendChild(pdf)
+      $local.container.appendChild(pdf)
       // projection.render([1040, 1020, 1004, 2004], 'red')
       // 创建操作区
       /* function createOperationBlocks(num, blocks) {

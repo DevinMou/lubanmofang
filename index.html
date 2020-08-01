@@ -130,25 +130,43 @@
 
     .virtual .main-rotation {
       transform-style: preserve-3d;
-      transform: rotateX(-15deg) rotateY(-10deg);
+      transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
     }
 
     .virtual .main-container {
+      width: 60px;
+      height: 60px;
+      font-size: 60px;
       transform-style: preserve-3d;
       transform: translateZ(-30px)
     }
 
-    .entity {
+    .local {
       transform-style: preserve-3d;
-      transform: scale(0.999);
+      /* transform: scale(0.99); */
+    }
+
+    .local .main-rotation {
+      transform-style: preserve-3d;
+      font-size: 59.9px;
+      transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
+    }
+
+    .local .main-container {
+      width: 1em;
+      height: 1em;
+      font-size: 1em;
+      transform-style: preserve-3d;
+      transform: translateZ(-.5em)
     }
 
     .zft {
       position: absolute;
       left: 0;
       top: 0;
-      width: 100%;
-      height: 100%;
+      width: 1em;
+      height: 1em;
+      font-size: inherit;
       display: block;
       background: transparent;
       transform-style: preserve-3d;
@@ -301,8 +319,8 @@
     } */
 
     .part-container {
-      width: 30px;
-      height: 30px;
+      width: 1em;
+      height: 1em;
       transform: translate3d(-50%, -50%, 0);
       display: inline-block;
       position: absolute;
@@ -568,9 +586,9 @@
     }
     styleobj2str(obj) {
       obj = obj || {}
-      obj.width = obj.width || this.size
-      obj.height = obj.height || this.size
-      obj['font-size'] = obj['font-size'] || this.size
+      // obj.width = obj.width || this.size
+      // obj.height = obj.height || this.size
+      // obj['font-size'] = obj['font-size'] || this.size
       obj.transform = obj.transform || { translate: [] }
       for (let name in obj) {
         const value = obj[name]
@@ -585,7 +603,7 @@
             break
           case 'transform':
             if (tp === 'object') {
-              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0)) * this.size}px,${(this.site[1] - 1 + (value.translate[1] || 0)) * this.size}px,${(this.site[0] - 1 + (value.translate[2] || 0)) * this.size}px)` : '',
+              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0))}em,${(this.site[1] - 1 + (value.translate[1] || 0))}em,${(this.site[0] - 1 + (value.translate[2] || 0))}em)` : '',
               value.rotate ? [
                 value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : '',
                 value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : '',
@@ -658,6 +676,7 @@
         this.scrollLayer = part
         const partView = document.createElement('div')
         partView.className = 'part-perspective'
+        partView.style.fontSize = size + 'px'
         this.perspectiveLayer = partView
         this.containerLayer = parentNode
         partView.appendChild(parentNode)
@@ -682,7 +701,7 @@
       this.clear()
       if (offset !== undefined) {
         this.offset = offset || [0, 0, 0]
-        this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0] * this.size}px),calc(-50% + ${this.offset[1] * this.size}px),${((1 + this.offset[2]) * this.size)}px)`
+        this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0]}em),calc(-50% + ${this.offset[1]}em),${((1 + this.offset[2]))}em)`
       }
       this.setSite(numArr)
       this.setColor(bgColor)
@@ -1189,7 +1208,7 @@
     function rotateMove(args) {
       // const [x, y, z, a] = args.reduce((a, b) => a + b)
       const [x, y, z, a] = args.last()
-      $virtual.rotat.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+      $virtual.rotation.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
       // $info.innerText = `x:${x.toFixed(3)},  y${y.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
     }
     const mainAnimate = new Animate(rotateMove)

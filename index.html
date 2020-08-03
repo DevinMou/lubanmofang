@@ -1399,9 +1399,19 @@
             $roulette.classList.add('active')
             // const c1 = coordinateExchangeRule(c0)
             // const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
-            const n1 = Object.keys(center.hub).map(point => {
-              return coordinates[coordinateExchangeRule(c0, points[point].coordinate).join('')]
+            const MinRest = [2, 2, 2]
+            const MaxRest = [2, 2, 2]
+            const c = Object.keys(center.hub).map(point => {
+              const res = coordinateExchangeRule(c0, points[point].coordinate)
+              res.forEach((item, index) => {
+                MinRest[index] = Math.min(1 - item, MinRest[index])
+                MaxRest[index] = Math.min(1 + item, MaxRest[index])
+              })
+              return res
             })
+            projection.minRest = MinRest
+            projection.maxRest = MaxRest
+            const n1 = c.map(item => coordinates[item.map((item$, index$) => item$ + MinRest[index$]).join('')])
             projection.render(n1, center.bgColor)
           } else {
             $ring.className = 'ring'
@@ -1589,9 +1599,16 @@
 
       const pdf = document.createDocumentFragment()
       const projection = {
+        minRest: [],
+        maxRest: [],
+        translate3d: [0, 0, 0],
+        rotate3d: [[0, -15], [1, -10]],
         block: new Block(Array.from(Array(4), () => new SmallCube(pdf)), [], ReactData.size, $ct.children[0]),
         render(numArr, color) {
           this.block.init(numArr, color)
+        },
+        translate(x, y, z) {
+
         }
       }
       $local.container.appendChild(pdf)

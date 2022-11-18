@@ -1,311 +1,313 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name="viewport"
-    content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <!-- <meta name="full-screen" content="yes" />
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- <meta name="full-screen" content="yes" />
   <meta name="x5-fullscreen" content="yes" />
   <meta name="browsermode" content="application" />
   <meta name="x5-page-mode" content="app" /> -->
 
-  <style id="app-style">
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      background-color: #ffffff;
-      touch-action: none;
-    }
+    <style id="app-style">
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background-color: #ffffff;
+        touch-action: none;
+      }
 
-    .main {
-      background: #ffffff;
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 70%;
-      height: 100%;
-    }
+      .main {
+        background: #ffffff;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 70%;
+        height: 100%;
+      }
 
-    .perspective {
-      backface-visibility: hidden;
-      transform-style: preserve-3d;
-      position: absolute;
-      top: 0;
-      font-size: 0;
-      left: 0;
-      background: transparent;
-      width: 100%;
-      height: 100%;
-    }
+      .perspective {
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        position: absolute;
+        top: 0;
+        font-size: 0;
+        left: 0;
+        background: transparent;
+        width: 100%;
+        height: 100%;
+      }
 
-    .perspective::before {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: red;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+      .perspective::before {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: red;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
 
-    .perspective::after {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: black;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate3d(-50%, -50%, 90px);
-    }
+      .perspective::after {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: black;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate3d(-50%, -50%, 90px);
+      }
 
-    #n-vector {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: darkgoldenrod;
-      top: calc(50% - 2px);
-      left: calc(50% - 2px);
-    }
+      #n-vector {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: darkgoldenrod;
+        top: calc(50% - 2px);
+        left: calc(50% - 2px);
+      }
 
-    .fixed {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 30%;
-      height: 100%;
-      z-index: 1;
-      background: rgba(238, 238, 238, 0.4);
-    }
+      .fixed {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 30%;
+        height: 100%;
+        z-index: 1;
+        background: rgba(238, 238, 238, 0.4);
+      }
 
-    .fixed .swiper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
+      .fixed .swiper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
 
-    .fixed .swiper>div {
-      position: absolute;
-      width: 30vw;
-      height: 30vw;
-      left: 0;
-      transform-origin: center;
-      top: calc(50vh - 15vw);
-    }
+      .fixed .swiper > div {
+        position: absolute;
+        width: 30vw;
+        height: 30vw;
+        left: 0;
+        transform-origin: center;
+        top: calc(50vh - 15vw);
+      }
 
-    .background-board {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      /* background: rgba(238, 238, 238, 0.5); */
-    }
+      .background-board {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        /* background: rgba(238, 238, 238, 0.5); */
+      }
 
-    .container {
-      display: inline-block;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-style: preserve-3d;
-    }
+      .container {
+        display: inline-block;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-style: preserve-3d;
+      }
 
-    .entity,
-    .virtual {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
+      .entity,
+      .virtual {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
 
-    .virtual .main-rotation {
-      transform-style: preserve-3d;
-      transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
-    }
+      .virtual .main-rotation {
+        transform-style: preserve-3d;
+        transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
+      }
 
-    .virtual .main-container {
-      width: 60px;
-      height: 60px;
-      font-size: 60px;
-      transform-style: preserve-3d;
-      transform: translateZ(-30px)
-    }
+      .virtual .main-container {
+        width: 60px;
+        height: 60px;
+        font-size: 60px;
+        transform-style: preserve-3d;
+        transform: translateZ(-30px);
+      }
 
-    .local {
-      transform-style: preserve-3d;
-      /* transform: scale(0.99); */
-    }
+      .local {
+        transform-style: preserve-3d;
+        /* transform: scale(0.99); */
+      }
 
-    .local .main-rotation {
-      transform-style: preserve-3d;
-      font-size: 59.9px;
-      transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
-    }
+      .local .main-rotation {
+        transform-style: preserve-3d;
+        font-size: 59.9px;
+        transform: rotate3d(0.830664, 0.552011, 0.0726737, -0.314367rad);
+      }
 
-    .local .main-container {
-      width: 1em;
-      height: 1em;
-      font-size: 1em;
-      transform-style: preserve-3d;
-      transform: translateZ(-.5em)
-    }
+      .local .main-container {
+        width: 1em;
+        height: 1em;
+        font-size: 1em;
+        transform-style: preserve-3d;
+        transform: translateZ(-0.5em);
+      }
 
-    .zft {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 1em;
-      height: 1em;
-      font-size: inherit;
-      display: block;
-      background: transparent;
-      transform-style: preserve-3d;
-    }
+      .zft {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1em;
+        height: 1em;
+        font-size: inherit;
+        display: block;
+        background: transparent;
+        transform-style: preserve-3d;
+      }
 
-    .zft span {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      box-sizing: border-box;
-      top: 0;
-      left: 0;
-      transform-origin: 0% 0%;
-      opacity: .5;
-    }
+      .zft span {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        transform-origin: 0% 0%;
+        opacity: 0.5;
+      }
 
-    .zft span:nth-child(2) {
-      transform: rotateX(90deg);
-    }
+      .zft span:nth-child(2) {
+        transform: rotateX(90deg);
+      }
 
-    .zft span:nth-child(3) {
-      transform: translateX(100%) rotateY(-90deg);
-    }
+      .zft span:nth-child(3) {
+        transform: translateX(100%) rotateY(-90deg);
+      }
 
-    .zft span:nth-child(4) {
-      transform: rotateY(-90deg);
-    }
+      .zft span:nth-child(4) {
+        transform: rotateY(-90deg);
+      }
 
-    .zft span:nth-child(5) {
-      transform: translateY(100%) rotateX(90deg);
-    }
+      .zft span:nth-child(5) {
+        transform: translateY(100%) rotateX(90deg);
+      }
 
-    .zft span:nth-child(6) {
-      transform: translateZ(1em);
-    }
+      .zft span:nth-child(6) {
+        transform: translateZ(1em);
+      }
 
-    /*[down:b,r,back:t,r,right:b,r,left:t,l,front:b,l,top:t,l]*/
-    .zft.h1 span:nth-child(1),
-    .zft.h2 span:nth-child(2),
-    .zft.h3 span:nth-child(3),
-    .zft.h4 span:nth-child(4),
-    .zft.h5 span:nth-child(5),
-    .zft.h6 span:nth-child(6) {
-      background: transparent !important;
-    }
+      /*[down:b,r,back:t,r,right:b,r,left:t,l,front:b,l,top:t,l]*/
+      .zft.h1 span:nth-child(1),
+      .zft.h2 span:nth-child(2),
+      .zft.h3 span:nth-child(3),
+      .zft.h4 span:nth-child(4),
+      .zft.h5 span:nth-child(5),
+      .zft.h6 span:nth-child(6) {
+        background: transparent !important;
+      }
 
-    .zft.grid span {
-      /* background: #4cbbf380; */
-      background: rgba(76, 187, 243, 0.5);
-      /* background: #4cbbf3; */
-    }
+      .zft.grid span {
+        /* background: #4cbbf380; */
+        background: rgba(76, 187, 243, 0.5);
+        /* background: #4cbbf3; */
+      }
 
-    .zft.grid span:nth-child(1) {
-      border-right: 1px dashed #ffffff;
-      border-bottom: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(1) {
+        border-right: 1px dashed #ffffff;
+        border-bottom: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g0 span:nth-child(1) {
-      background: transparent !important;
-      border-right: 0;
-      border-bottom: 0;
-    }
+      .zft.grid.g0 span:nth-child(1) {
+        background: transparent !important;
+        border-right: 0;
+        border-bottom: 0;
+      }
 
-    .zft.grid span:nth-child(2) {
-      border-right: 1px dashed #ffffff;
-      border-top: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(2) {
+        border-right: 1px dashed #ffffff;
+        border-top: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g1 span:nth-child(2) {
-      background: transparent !important;
-      border-right: 0;
-      border-top: 0;
-    }
+      .zft.grid.g1 span:nth-child(2) {
+        background: transparent !important;
+        border-right: 0;
+        border-top: 0;
+      }
 
-    .zft.grid span:nth-child(3) {
-      border-right: 1px dashed #ffffff;
-      border-bottom: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(3) {
+        border-right: 1px dashed #ffffff;
+        border-bottom: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g2 span:nth-child(3) {
-      background: transparent !important;
-      border-right: 0;
-      border-bottom: 0;
-    }
+      .zft.grid.g2 span:nth-child(3) {
+        background: transparent !important;
+        border-right: 0;
+        border-bottom: 0;
+      }
 
-    .zft.grid span:nth-child(4) {
-      border-left: 1px dashed #ffffff;
-      border-top: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(4) {
+        border-left: 1px dashed #ffffff;
+        border-top: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g3 span:nth-child(4) {
-      border-left: 0;
-      border-top: 0;
-    }
+      .zft.grid.g3 span:nth-child(4) {
+        border-left: 0;
+        border-top: 0;
+      }
 
-    .zft.grid span:nth-child(5) {
-      border-left: 1px dashed #ffffff;
-      border-bottom: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(5) {
+        border-left: 1px dashed #ffffff;
+        border-bottom: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g4 span:nth-child(5) {
-      border-left: 0;
-      border-bottom: 0;
-    }
+      .zft.grid.g4 span:nth-child(5) {
+        border-left: 0;
+        border-bottom: 0;
+      }
 
-    .zft.grid span:nth-child(6) {
-      border-left: 1px dashed #ffffff;
-      border-top: 1px dashed #ffffff;
-    }
+      .zft.grid span:nth-child(6) {
+        border-left: 1px dashed #ffffff;
+        border-top: 1px dashed #ffffff;
+      }
 
-    .zft.grid.g5 span:nth-child(6) {
-      border-left: 0;
-      border-top: 0;
-    }
-  </style>
-  <style>
-    .part {
-      position: relative;
-      transform-style: preserve-3d;
-    }
+      .zft.grid.g5 span:nth-child(6) {
+        border-left: 0;
+        border-top: 0;
+      }
+    </style>
+    <style>
+      .part {
+        position: relative;
+        transform-style: preserve-3d;
+      }
 
-    .part.center {
-      /* background-color: rgba(112, 186, 230, 0.5); */
-    }
+      .part.center {
+        /* background-color: rgba(112, 186, 230, 0.5); */
+      }
 
-    .part-perspective {
-      backface-visibility: hidden;
-      transform-style: preserve-3d;
-      perspective-origin: center;
-      /* transform: rotateX(75deg) rotateZ(-20deg); */
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      font-size: 0;
-    }
+      .part-perspective {
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        perspective-origin: center;
+        /* transform: rotateX(75deg) rotateZ(-20deg); */
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        font-size: 0;
+      }
 
-    /* .part-perspective::after {
+      /* .part-perspective::after {
       content: '';
       display: block;
       width: 10px;
@@ -318,374 +320,417 @@
       transform: translate(-50%, -50%);
     } */
 
-    .part-container {
-      width: 1em;
-      height: 1em;
-      transform: translate3d(-50%, -50%, 0);
-      display: inline-block;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform-style: preserve-3d;
-    }
-  </style>
-  <style id="touch-style">
-    .main-touch,
-    .deputy-touch {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-    }
+      .part-container {
+        width: 1em;
+        height: 1em;
+        transform: translate3d(-50%, -50%, 0);
+        display: inline-block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-style: preserve-3d;
+      }
+    </style>
+    <style id="touch-style">
+      .main-touch,
+      .deputy-touch {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+      }
 
-    .roulette {
-      position: absolute;
-      width: 26vw;
-      height: 26vw;
-      left: 2vw;
-      top: calc(50% - 13vw);
-      border-radius: 50%;
-      overflow: hidden;
-      /* pointer-events: none; */
-      visibility: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+      .roulette {
+        position: absolute;
+        width: 26vw;
+        height: 26vw;
+        left: 2vw;
+        top: calc(50% - 13vw);
+        border-radius: 50%;
+        overflow: hidden;
+        /* pointer-events: none; */
+        visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-    .roulette.active {
-      /* pointer-events: unset; */
-      visibility: visible;
-      box-shadow: inset 0 0 5px 0px rgb(49 82 90 / 10%);
-      background: rgb(187 187 187 / 7%);
-    }
+      .roulette.active {
+        /* pointer-events: unset; */
+        visibility: visible;
+        box-shadow: inset 0 0 5px 0px rgb(49 82 90 / 10%);
+        background: rgb(187 187 187 / 7%);
+      }
 
-    .roulette.active.touch {
-      box-shadow: inset 0 0 5px 0px rgb(56 216 255 / 18%);
-    }
+      .roulette.active.touch {
+        box-shadow: inset 0 0 5px 0px rgb(56 216 255 / 18%);
+      }
 
-    .rocker {
-      display: block;
-      position: absolute;
-      width: 10vw;
-      height: 10vw;
-      border-radius: 50%;
-      background-color: rgb(47 66 74 / 41%)
-    }
+      .rocker {
+        display: block;
+        position: absolute;
+        width: 10vw;
+        height: 10vw;
+        border-radius: 50%;
+        background-color: rgb(47 66 74 / 41%);
+      }
 
-    .roulette.active.touch .rocker {
-      box-shadow: 0 0 10px 0 #59d0fb9c;
-    }
+      .roulette.active.touch .rocker {
+        box-shadow: 0 0 10px 0 #59d0fb9c;
+      }
 
-    .contact {
-      position: absolute;
-      transform-origin: center 13vw;
-      transform: rotate(0deg) translateY(-25px);
-      display: block;
-      top: 0px;
-      left: -7vw;
-      width: 40vw;
-      border-radius: 50%;
-      height: 40vw;
-      background: transparent;
-      box-shadow: inset 0 5px 15px 5px #32c1ea;
-    }
+      .contact {
+        position: absolute;
+        transform-origin: center 13vw;
+        transform: rotate(0deg) translateY(-25px);
+        display: block;
+        top: 0px;
+        left: -7vw;
+        width: 40vw;
+        border-radius: 50%;
+        height: 40vw;
+        background: transparent;
+        box-shadow: inset 0 5px 15px 5px #32c1ea;
+      }
 
-    .ring {
-      width: 6vw;
-      height: 22.5vw;
-      transform-origin: 15vw 50%;
-      position: absolute;
-      overflow: hidden;
-      top: calc(50% - 11.25vw);
-      left: 0;
-    }
+      .ring {
+        width: 6vw;
+        height: 22.5vw;
+        transform-origin: 15vw 50%;
+        position: absolute;
+        overflow: hidden;
+        top: calc(50% - 11.25vw);
+        left: 0;
+      }
 
-    .ring::before {
-      content: '';
-      display: block;
-      width: 26vw;
-      height: 26vw;
-      border: 2vw solid transparent;
-      border-radius: 50%;
-      transform-origin: center;
-      position: absolute;
-      overflow: hidden;
-      top: calc(50% - 15vw);
-      left: 0;
-    }
+      .ring::before {
+        content: "";
+        display: block;
+        width: 26vw;
+        height: 26vw;
+        border: 2vw solid transparent;
+        border-radius: 50%;
+        transform-origin: center;
+        position: absolute;
+        overflow: hidden;
+        top: calc(50% - 15vw);
+        left: 0;
+      }
 
-    .ring.active::before {
-      border-left-color: rgb(89 190 220 / 30%);
-    }
+      .ring.active::before {
+        border-left-color: rgb(89 190 220 / 30%);
+      }
 
-    .ring.active.touch::before {
-      border-left-color: rgb(94 220 241 / 50%);
-    }
+      .ring.active.touch::before {
+        border-left-color: rgb(94 220 241 / 50%);
+      }
 
-    .ring.move::before {
-      border-left-color: rgb(253 187 67 / 50%);
-    }
-  </style>
-  <style id="var-style">
-    .background-board {
-      transform: translateZ(-90px);
-    }
+      .ring.move::before {
+        border-left-color: rgb(253 187 67 / 50%);
+      }
+    </style>
+    <style id="var-style">
+      .background-board {
+        transform: translateZ(-90px);
+      }
 
-    .container {
-      width: 60px;
-      height: 60px;
-      transform: translate3d(-50%, -50%, -30px);
-    }
+      .container {
+        width: 60px;
+        height: 60px;
+        transform: translate3d(-50%, -50%, -30px);
+      }
 
-    /* .zft span:nth-child(6) {
+      /* .zft span:nth-child(6) {
       transform: translateZ(60px);
     } */
-  </style>
-</head>
+    </style>
+  </head>
 
-<body>
-  <div class="main">
-    <div class="perspective">
-      <div class="background-board"></div>
-      <div class="container">
-        <div class="local">
-          <div class="main-translate">
+  <body>
+    <div class="main">
+      <div class="perspective">
+        <div class="background-board"></div>
+        <div class="container">
+          <div class="local">
+            <div class="main-translate">
+              <div class="main-rotation">
+                <div class="main-container"></div>
+              </div>
+            </div>
+          </div>
+          <div class="virtual">
             <div class="main-rotation">
               <div class="main-container"></div>
             </div>
           </div>
         </div>
-        <div class="virtual">
-          <div class="main-rotation">
-            <div class="main-container"></div>
-          </div>
+      </div>
+      <div class="main-touch">
+        <div id="info"></div>
+        <div id="n-vector"></div>
+      </div>
+    </div>
+    <div class="fixed">
+      <div class="swiper"></div>
+      <div class="deputy-touch">
+        <div class="roulette">
+          <div class="contact"></div>
+          <div class="rocker"></div>
         </div>
+        <div class="ring"></div>
       </div>
     </div>
-    <div class="main-touch">
-      <div id="info"></div>
-      <div id="n-vector"></div>
-    </div>
-  </div>
-  <div class="fixed">
-    <div class="swiper">
-    </div>
-    <div class="deputy-touch">
-      <div class="roulette">
-        <div class="contact"></div>
-        <div class="rocker"></div>
-      </div>
-      <div class="ring">
-      </div>
-    </div>
-  </div>
-</body>
-<script src="./index.js"></script>
-<script>
-  const ReactData = new Proxy({ size: 60, resizeQuene: [] }, {
-    set(target, propKey, value) {
-      switch (propKey) {
-        case 'size':
-          if (target[propKey] !== value) {
-            const sheet = target.$varStyle.sheet
-            sheet.removeRule(0)
-            sheet.removeRule(0)
-            sheet.removeRule(0)
-            sheet.insertRule(`.zft span:nth-child(6) {transform: translateZ(${value}px);}`, 0)
-            sheet.insertRule(`.container {width: ${value}px;height: ${value}px;transform: translate3d(-50%,-50%,-${value / 2}px);}`, 0)
-            sheet.insertRule(`.background-board {transform: translateZ(-${value * 1.5 - (target.boardAbove || 0)}px);}`, 0)
-          }
-          break
-        case 'boardAbove':
-          if (target[propKey] !== value && typeof value === 'number') {
-            sheet.removeRule(0)
-            sheet.insertRule(`.background-board {transform: translateZ(-${value * 1.5 - (target.boardAbove || 0)}px);}`, 0)
-          }
-          break
-        default:
-          break
-      }
-      target[propKey] = value
-      return true
-    }
-  })
-  ReactData.bindResizeDate = function (args, fn) {
-    this.resizeQuene.push([args, fn])
-    const res = fn()
-    args.forEach((item, index) => this[item] = res[index])
-  }
-  ReactData.resize = function () {
-    this.resizeQuene.forEach(item$ => {
-      const res = item$[1]()
-      item$[0].forEach((item, index) => this[item] = res[index])
-    })
-  }
-  class SmallCube {
-    constructor(parentNode, site = [0, 0, 0], size = ReactData.size) {
-      const _this = this
-      _this.site = [...site]
-      _this.hideFace = {}
-      _this.size = size
-      parentNode.appendChild(_this.createEl())
-      _this.style = new Proxy({}, {
+  </body>
+  <script src="./index.js"></script>
+  <script>
+    const ReactData = new Proxy(
+      { size: 60, resizeQuene: [] },
+      {
         set(target, propKey, value) {
-          if (typeof value === 'string' && target[propKey] !== value) {
-            target[propKey] = value
-            _this.upStyle(propKey, value)
-            return true
-          } else {
-            return true
+          switch (propKey) {
+            case "size":
+              if (target[propKey] !== value) {
+                const sheet = target.$varStyle.sheet;
+                sheet.removeRule(0);
+                sheet.removeRule(0);
+                sheet.removeRule(0);
+                sheet.insertRule(
+                  `.zft span:nth-child(6) {transform: translateZ(${value}px);}`,
+                  0
+                );
+                sheet.insertRule(
+                  `.container {width: ${value}px;height: ${value}px;transform: translate3d(-50%,-50%,-${
+                    value / 2
+                  }px);}`,
+                  0
+                );
+                sheet.insertRule(
+                  `.background-board {transform: translateZ(-${
+                    value * 1.5 - (target.boardAbove || 0)
+                  }px);}`,
+                  0
+                );
+              }
+              break;
+            case "boardAbove":
+              if (target[propKey] !== value && typeof value === "number") {
+                sheet.removeRule(0);
+                sheet.insertRule(
+                  `.background-board {transform: translateZ(-${
+                    value * 1.5 - (target.boardAbove || 0)
+                  }px);}`,
+                  0
+                );
+              }
+              break;
+            default:
+              break;
           }
+          target[propKey] = value;
+          return true;
         },
-        deleteProperty(target, propKey) {
-          delete target[propKey]
-          _this.upStyle(propKey)
-          return true
-        }
-      })
-      return new Proxy(this, {
-        set(target, propKey, value) {
-          if (propKey === 'site') {
-            target.site = value
-            target.el.style = target.styleobj2str()
-            return true
-          } else {
-            return Reflect.set(target, propKey, value)
+      }
+    );
+    ReactData.bindResizeDate = function (args, fn) {
+      this.resizeQuene.push([args, fn]);
+      const res = fn();
+      args.forEach((item, index) => (this[item] = res[index]));
+    };
+    ReactData.resize = function () {
+      this.resizeQuene.forEach((item$) => {
+        const res = item$[1]();
+        item$[0].forEach((item, index) => (this[item] = res[index]));
+      });
+    };
+    class SmallCube {
+      constructor(parentNode, site = [0, 0, 0], size = ReactData.size) {
+        const _this = this;
+        _this.site = [...site];
+        _this.hideFace = {};
+        _this.size = size;
+        parentNode.appendChild(_this.createEl());
+        _this.style = new Proxy(
+          {},
+          {
+            set(target, propKey, value) {
+              if (typeof value === "string" && target[propKey] !== value) {
+                target[propKey] = value;
+                _this.upStyle(propKey, value);
+                return true;
+              } else {
+                return true;
+              }
+            },
+            deleteProperty(target, propKey) {
+              delete target[propKey];
+              _this.upStyle(propKey);
+              return true;
+            },
           }
-        },
-        get(target, propKey) {
-          return Reflect.get(target, propKey)
-        }
-      })
-    }
-    getSiteStr() {
-      const [f, r, c] = this.site
-      return (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r)
-    }
-    upStyle(key, value) {
-      const childrenStyle = ['background', 'opacity']
-      if (value !== void 0) {
-        if (childrenStyle.includes(key)) {
-          Array.prototype.forEach.call(this.el.children, node => {
-            node.style.setProperty(key, value)
-          })
+        );
+        return new Proxy(this, {
+          set(target, propKey, value) {
+            if (propKey === "site") {
+              target.site = value;
+              target.el.style = target.styleobj2str();
+              return true;
+            } else {
+              return Reflect.set(target, propKey, value);
+            }
+          },
+          get(target, propKey) {
+            return Reflect.get(target, propKey);
+          },
+        });
+      }
+      getSiteStr() {
+        const [f, r, c] = this.site;
+        return (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r);
+      }
+      upStyle(key, value) {
+        const childrenStyle = ["background", "opacity"];
+        if (value !== void 0) {
+          if (childrenStyle.includes(key)) {
+            Array.prototype.forEach.call(this.el.children, (node) => {
+              node.style.setProperty(key, value);
+            });
+          } else {
+            this.el.style.setProperty(key, value);
+          }
         } else {
-          this.el.style.setProperty(key, value)
-        }
-      } else {
-        if (childrenStyle.includes(key)) {
-          Array.prototype.forEach.call(this.el.children, node => {
-            node.style.removeProperty(key)
-          })
-        } else {
-          this.el.style.removeProperty(key)
+          if (childrenStyle.includes(key)) {
+            Array.prototype.forEach.call(this.el.children, (node) => {
+              node.style.removeProperty(key);
+            });
+          } else {
+            this.el.style.removeProperty(key);
+          }
         }
       }
-    }
-    styleobj2str(obj) {
-      obj = obj || {}
-      // obj.width = obj.width || this.size
-      // obj.height = obj.height || this.size
-      // obj['font-size'] = obj['font-size'] || this.size
-      obj.transform = obj.transform || { translate: [] }
-      for (let name in obj) {
-        const value = obj[name]
-        const tp = typeof value
-        switch (name) {
-          case 'width': case 'height': case 'font-size':
-            if (tp === 'number') {
-              obj[name] = value + 'px'
-            } else if (tp !== 'stirng') {
-              delete obj[name]
-            }
-            break
-          case 'transform':
-            if (tp === 'object') {
-              obj[name] = [value.translate ? `translate3d(${(this.site[2] - 1 + (value.translate[0] || 0))}em,${(this.site[1] - 1 + (value.translate[1] || 0))}em,${(this.site[0] - 1 + (value.translate[2] || 0))}em)` : '',
-              value.rotate ? [
-                value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : '',
-                value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : '',
-                value.rotate[2] ? `rotateZ(${value.rotate[2]}deg)` : ''].join(' ') : ''].join(' ')
-            } else if (tp !== 'string') {
-              delete obj[name]
-            }
-            break
-          default:
-            if (tp !== 'string') {
-              delete obj[name]
-            }
-            break
+      styleobj2str(obj) {
+        obj = obj || {};
+        // obj.width = obj.width || this.size
+        // obj.height = obj.height || this.size
+        // obj['font-size'] = obj['font-size'] || this.size
+        obj.transform = obj.transform || { translate: [] };
+        for (let name in obj) {
+          const value = obj[name];
+          const tp = typeof value;
+          switch (name) {
+            case "width":
+            case "height":
+            case "font-size":
+              if (tp === "number") {
+                obj[name] = value + "px";
+              } else if (tp !== "stirng") {
+                delete obj[name];
+              }
+              break;
+            case "transform":
+              if (tp === "object") {
+                obj[name] = [
+                  value.translate
+                    ? `translate3d(${
+                        this.site[2] - 1 + (value.translate[0] || 0)
+                      }em,${this.site[1] - 1 + (value.translate[1] || 0)}em,${
+                        this.site[0] - 1 + (value.translate[2] || 0)
+                      }em)`
+                    : "",
+                  value.rotate
+                    ? [
+                        value.rotate[0] ? `rotateX(${value.rotate[0]}deg)` : "",
+                        value.rotate[1] ? `rotateY(${value.rotate[1]}deg)` : "",
+                        value.rotate[2] ? `rotateZ(${value.rotate[2]}deg)` : "",
+                      ].join(" ")
+                    : "",
+                ].join(" ");
+              } else if (tp !== "string") {
+                delete obj[name];
+              }
+              break;
+            default:
+              if (tp !== "string") {
+                delete obj[name];
+              }
+              break;
+          }
+        }
+        return Object.keys(obj)
+          .map((key) => `${key}:${obj[key]}`)
+          .join(";");
+      }
+      changeSize(size) {
+        if (size !== this.size) {
+          this.size = size;
+          // this.el.children[5].style.transform = `translateZ(${this.size}px)`
         }
       }
-      return Object.keys(obj).map(key => `${key}:${obj[key]}`).join(';')
-    }
-    changeSize(size) {
-      if (size !== this.size) {
-        this.size = size
-        // this.el.children[5].style.transform = `translateZ(${this.size}px)`
-      }
-    }
-    createEl() {
-      const zft = document.createElement('div')
-      zft.className = 'zft'
-      const [f, r, c] = this.site
-      zft.dataset.id = (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r)
-      zft.style = this.styleobj2str()
-      for (let i = 0; i < 6; i++) {
-        const span = document.createElement('span')
-        /* if (i === 5) {
+      createEl() {
+        const zft = document.createElement("div");
+        zft.className = "zft";
+        const [f, r, c] = this.site;
+        zft.dataset.id = (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r);
+        zft.style = this.styleobj2str();
+        for (let i = 0; i < 6; i++) {
+          const span = document.createElement("span");
+          /* if (i === 5) {
           span.style.transform = `translateZ(${this.size}px)`
         } */
-        zft.appendChild(span)
+          zft.appendChild(span);
+        }
+        this.el = zft;
+        return zft;
       }
-      this.el = zft
-      return zft
-    }
-    setGrid(arr, color) {//[2001,...]
-      const siteStr = this.getSiteStr()
-      const point = points[siteStr]
-      const edges = Object.values(point).map(item => 'g' + item.cs)
-      this.el.className = ['zft', 'grid', ...edges].join(' ')
-    }
-    setHideClass(noHide) {
-      this.el.className = noHide ? 'zft' : ['zft', ...Object.keys(this.hideFace).map(item => item - -1)].join(' h')
-    }
-    hide() {
-      this.upStyle('opacity', '0')
-    }
-    show() {
-      this.upStyle('opacity', this.style.opacity || '1')
-    }
-  }
-
-  class Block {
-    constructor(cubes, parent, size, parentNode, documentFragment) {
-      this.hub = {}
-      this.cubes = cubes
-      this.parent = parent
-      this.offset = [0, 0, 0]
-      this.size = size
-      this.rotateAngle = null //x,y,z
-      if (documentFragment === undefined) {
-        this.containerLayer = parentNode
-      } else {
-        const part = document.createElement('div')
-        part.className = 'part'
-        this.scrollLayer = part
-        const partView = document.createElement('div')
-        partView.className = 'part-perspective'
-        partView.style.fontSize = size + 'px'
-        this.perspectiveLayer = partView
-        this.containerLayer = parentNode
-        partView.appendChild(parentNode)
-        part.appendChild(partView)
-        documentFragment.appendChild(part)
+      setGrid(arr, color) {
+        //[2001,...]
+        const siteStr = this.getSiteStr();
+        const point = points[siteStr];
+        const edges = Object.values(point).map((item) => "g" + item.cs);
+        this.el.className = ["zft", "grid", ...edges].join(" ");
       }
+      setHideClass(noHide) {
+        this.el.className = noHide
+          ? "zft"
+          : [
+              "zft",
+              ...Object.keys(this.hideFace).map((item) => item - -1),
+            ].join(" h");
+      }
+      hide() {
+        this.upStyle("opacity", "0");
+      }
+      show() {
+        this.upStyle("opacity", this.style.opacity || "1");
+      }
+    }
 
-      // this.parentNode = partContainer
-      /* numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
+    class Block {
+      constructor(cubes, parent, size, parentNode, documentFragment) {
+        this.hub = {};
+        this.cubes = cubes;
+        this.parent = parent;
+        this.offset = [0, 0, 0];
+        this.size = size;
+        this.rotateAngle = null; //x,y,z
+        if (documentFragment === undefined) {
+          this.containerLayer = parentNode;
+        } else {
+          const part = document.createElement("div");
+          part.className = "part";
+          this.scrollLayer = part;
+          const partView = document.createElement("div");
+          partView.className = "part-perspective";
+          partView.style.fontSize = size + "px";
+          this.perspectiveLayer = partView;
+          this.containerLayer = parentNode;
+          partView.appendChild(parentNode);
+          part.appendChild(partView);
+          documentFragment.appendChild(part);
+        }
+
+        // this.parentNode = partContainer
+        /* numArr.map(item => nums2arrs(item)).forEach((a, ai) => {
         a.forEach((b, bi) => {
           b.forEach((c, ci) => {
             if (c) {
@@ -695,367 +740,395 @@
           })
         })
       }) */
-      //this.setHideFace(bgColor, noHide)
-    }
-    init(numArr, bgColor, noHide, offset) {
-      this.clear()
-      if (offset !== undefined) {
-        this.offset = offset || [0, 0, 0]
-        this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${this.offset[0]}em),calc(-50% + ${this.offset[1]}em),${((1 + this.offset[2]))}em)`
+        //this.setHideFace(bgColor, noHide)
       }
-      this.setSite(numArr)
-      this.setColor(bgColor)
-      this.setHideFace(bgColor, noHide)
-    }
-    setSite(numArr) {
-      numArr.numSort().forEach((item, index) => {
-        const cube = this.cubes[index]
-        this.hub[item] = cube
-        cube.site = point2site(item)
-      })
-      if (numArr.length === 3 && this.cubes[3]) {
-        this.cubes[3].hide()
+      init(numArr, bgColor, noHide, offset) {
+        this.clear();
+        if (offset !== undefined) {
+          this.offset = offset || [0, 0, 0];
+          this.containerLayer.style.cssText = `transform: translate3d(calc(-50% + ${
+            this.offset[0]
+          }em),calc(-50% + ${this.offset[1]}em),${1 + this.offset[2]}em)`;
+        }
+        this.setSite(numArr);
+        this.setColor(bgColor);
+        this.setHideFace(bgColor, noHide);
       }
-    }
-    setColor(color) {
-      this.bgColor = color
-    }
-    clear() {
-      for (let point in this.hub) {
-        this.hub[point].hideFace = {}
-        delete this.hub[point]
-      }
-    }
-    setHideFace(color, noHide) {
-      for (let point in this.hub) {
-        const one = this.hub[point]
-        const cp = points[point]
-        for (let c in cp) {
-          const p = cp[c]
-          if (c in this.hub) {
-            this.hub[c].hideFace[5 - p.cs] = point
-            one.hideFace[p.cs] = c
-          }
+      setSite(numArr) {
+        numArr.numSort().forEach((item, index) => {
+          const cube = this.cubes[index];
+          this.hub[item] = cube;
+          cube.site = point2site(item);
+        });
+        if (numArr.length === 3 && this.cubes[3]) {
+          this.cubes[3].hide();
         }
       }
-      for (let k in this.hub) {
-        this.hub[k].style.background = color
-        this.hub[k].show()
-        this.hub[k].setHideClass(noHide)
+      setColor(color) {
+        this.bgColor = color;
       }
-    }
-    setStyle(style) {
-      for (let k in this.hub) {
-        Object.assign(this.hub[k].style, style)
-      }
-    }
-    hideSelf() {
-      for (let k in this.hub) {
-        this.hub[k].hide()
-      }
-    }
-    showSelf() {
-      for (let k in this.hub) {
-        this.hub[k].show()
-      }
-    }
-    hideSelf() {
-      for (let k in this.hub) {
-        this.hub[k].hide()
-      }
-    }
-    hideOther() {
-      this.parent.forEach(item => {
-        if (item !== this) {
-          item.hideSelf()
-        } else {
-          item.showSelf()
-        }
-      })
-    }
-  }
-
-  class ACB { // assemble cube
-    constructor(el, size) {// num = 27|4|3
-      this.blocks = []
-      this.list = null
-      const df = document.createDocumentFragment()
-      for (let i = 0; i < 7; i++) {
-        const block = []
-        const partContainer = document.createElement('div')
-        partContainer.className = 'part-container'
-        for (let j = 0; j < (i === 0 ? 3 : 4); j++) {
-          block.push(new SmallCube(partContainer, [0, 0, 0], size))
-        }
-        this.blocks.push(new Block(block, this.blocks, size, partContainer, df))
-      }
-      el.appendChild(df)
-    }
-    load(data, colors, noHide) {
-      this.show()
-      this.list = [...data]
-      let p3
-      const res = data.map(item => {
-        // return { offset: bulks[item].offset, points: block2points(bulks[item].points) }
-        return { offset: bulks[item].offset, points: bulks[item].points }
-      }).filter(item => item.points.length === 3 ? (p3 = item, false) : true);
-      ([p3, ...res]).forEach((item, index) => {
-        this.blocks[index].init(item.points, (colors && colors[index]) || 'transparent', noHide, item.offset)
-      })
-    }
-    getChildren() {
-      return [...this.blocks]
-    }
-    show(indexs) {
-      const isArr = Array.isArray(indexs)
-      this.blocks.forEach((item, index) => {
-        if ((isArr && indexs.includes(index)) || index === indexs) {
-          item.showSelf()
-        } else {
-          item.hideSelf()
-        }
-      })
-    }
-    hide(indexs) {
-      const isArr = Array.isArray(indexs)
-      this.blocks.forEach((item, index) => {
-        if ((isArr && indexs.includes(index)) || index === indexs) {
-          item.hideSelf()
-        } else {
-          item.showSelf()
-        }
-      })
-    }
-  }
-
-  class Animate {
-    constructor(fn, direct) {
-      this.pool = []
-      this.fn = fn
-      this.active = false
-      this.running = false
-      this.direct = direct
-    }
-    push(payload) {
-      this.running = true
-      this.pool.push(payload)
-      this.check()
-    }
-    stop() {
-      this.running = false
-    }
-    check() {
-      if (this.pool.length && !this.active) {
-        this.active = true
-        window.requestAnimationFrame(this.done.bind(this))
-      }
-    }
-    done() {
-      const args = [...this.pool]
-      this.pool.length = 0
-      if (this.running) {
-        this.fn(this.direct ? args.last() : args)
-        this.active = false
-        this.check()
-      } else {
-        this.active = false
-      }
-
-    }
-  }
-
-  // [<,-][田,T,刁,L,Z,厶,マ]
-  const bulks = {
-    '-2': {
-      points: [1040, 1002, 1004],
-      offset: [0.5, -0.5, -2.5]
-    },
-    '-1': {
-      points: [1004, 2004, 3004],
-      offset: [1, -1, -1.5]
-    },
-    0: {
-      points: [1040, 1020, 1004, 1002],
-      offset: [0.5, -0.5, -2.5]
-    },
-    1: {
-      points: [1020, 1004, 1002, 1001],
-      offset: [0, -0.5, -2.5]
-    },
-    2: {
-      points: [1040, 1020, 1004, 2040],
-      offset: [0.5, -0.5, -2]
-    },
-    3: {
-      points: [1040, 1004, 1002, 1001],
-      offset: [0, -0.5, -2.5]
-    },
-    4: {
-      points: [1040, 1020, 1002, 1001],
-      offset: [0, -0.5, -2.5]
-    },
-    5: {
-      points: [1040, 1020, 1004, 2020],
-      offset: [0.5, -0.5, -2]
-    },
-    6: {
-      points: [1040, 1020, 1004, 2004],
-      offset: [0.5, -0.5, -2]
-    }
-  }
-  class Bulk {
-    constructor(arr) {
-      this.hub = arr
-    }
-    load(id) { // 
-
-    }
-  }
-
-  function createBlocks(str) {//-1123456
-    str += ''
-    const arr = str.split('')
-    const b3 = -arr[1]
-    const b4s = str.slice
-  }
-
-  function ready(fn) {
-    document.addEventListener('DOMContentLoaded', function readyFn() {
-      document.removeEventListener('DOMContentLoaded', readyFn, false)
-      fn()
-    }, false)
-  }
-
-  class TouchEvent {
-    constructor($body) {
-      this.hub = new WeakMap()
-      this.touches = {}
-      this.lock = false
-      this.timer = null
-      this.$body = $body
-      $body.ontouchstart = this.startHandle.bind(this)
-      $body.ontouchend = this.endHandle.bind(this)
-      $body.ontouchmove = this.moveHandle.bind(this)
-      $body.ontouchcancel = this.cancelHandle.bind(this)
-    }
-    register(payload) {
-      const { el, ...events } = payload
-      const oldObj = this.hub.get(el) || { combo: 0, lastDate: null }
-      for (let eventName in events) {
-        const value = events[eventName]
-        if (eventName === 'click' || eventName === 'press') {
-          oldObj[eventName] = oldObj[eventName] || {}
-          oldObj[eventName][value[0]] = value.slice(1)
-        } else {
-          oldObj[eventName] = value
+      clear() {
+        for (let point in this.hub) {
+          this.hub[point].hideFace = {};
+          delete this.hub[point];
         }
       }
-      this.hub.set(el, oldObj)
-    }
-    startHandle(event) {
-      if (this.lock) {
-        return
-      }
-      event.preventDefault()
-      event.stopPropagation()
-      const nowDate = new Date().getTime()
-      Array.prototype.forEach.call(event.changedTouches, item => {
-        const { pageX, pageY, identifier, target } = item
-        if (!this.touches[identifier]) {
-          let events
-          let _target = target
-          while (!0) {
-            if (this.hub.has(_target)) {
-              events = this.hub.get(_target)
-              break
-            } else if (_target === document.documentElement) {
-              break
-            } else {
-              _target = _target.parentNode
+      setHideFace(color, noHide) {
+        for (let point in this.hub) {
+          const one = this.hub[point];
+          const cp = points[point];
+          for (let c in cp) {
+            const p = cp[c];
+            if (c in this.hub) {
+              this.hub[c].hideFace[5 - p.cs] = point;
+              one.hideFace[p.cs] = c;
             }
           }
-          if (events) {
-            const touch = { pageX: null, pageY: null, status: TouchEvent.STATUS_DOWN, events, startDate: new Date().getTime() }
-            if (touch.events.lastDate && nowDate - touch.events.lastDate >= TouchEvent.COMBO_DELAY) {
-              touch.events.combo = 0
-            }
-            touch.events.lastDate = nowDate
-            this.touches[identifier] = touch
-            if (events.start) {
-              events.start.bind(touch)(pageX, pageY)
-            }
-            if (events.press) {
-              const timeArr = Object.keys(events.press)
-              const _this = this
-              function timeFn() {
-                if (timeArr.length) {
-                  const time = timeArr.shift()
-                  return setTimeout(() => {
-                    const [fn, bubble] = events.press[time]
-                    if (bubble) {
-                      _this.timer = timeFn()
-                    } else {
-                      _this.timer = null
-                    }
-                    fn()
-                  }, time)
-                } else {
-                  return null
-                }
+        }
+        for (let k in this.hub) {
+          this.hub[k].style.background = color;
+          this.hub[k].show();
+          this.hub[k].setHideClass(noHide);
+        }
+      }
+      setStyle(style) {
+        for (let k in this.hub) {
+          Object.assign(this.hub[k].style, style);
+        }
+      }
+      hideSelf() {
+        for (let k in this.hub) {
+          this.hub[k].hide();
+        }
+      }
+      showSelf() {
+        for (let k in this.hub) {
+          this.hub[k].show();
+        }
+      }
+      hideSelf() {
+        for (let k in this.hub) {
+          this.hub[k].hide();
+        }
+      }
+      hideOther() {
+        this.parent.forEach((item) => {
+          if (item !== this) {
+            item.hideSelf();
+          } else {
+            item.showSelf();
+          }
+        });
+      }
+    }
+
+    class ACB {
+      // assemble cube
+      constructor(el, size) {
+        // num = 27|4|3
+        this.blocks = [];
+        this.list = null;
+        const df = document.createDocumentFragment();
+        for (let i = 0; i < 7; i++) {
+          const block = [];
+          const partContainer = document.createElement("div");
+          partContainer.className = "part-container";
+          for (let j = 0; j < (i === 0 ? 3 : 4); j++) {
+            block.push(new SmallCube(partContainer, [0, 0, 0], size));
+          }
+          this.blocks.push(
+            new Block(block, this.blocks, size, partContainer, df)
+          );
+        }
+        el.appendChild(df);
+      }
+      load(data, colors, noHide) {
+        this.show();
+        this.list = [...data];
+        let p3;
+        const res = data
+          .map((item) => {
+            // return { offset: bulks[item].offset, points: block2points(bulks[item].points) }
+            return { offset: bulks[item].offset, points: bulks[item].points };
+          })
+          .filter((item) =>
+            item.points.length === 3 ? ((p3 = item), false) : true
+          );
+        [p3, ...res].forEach((item, index) => {
+          this.blocks[index].init(
+            item.points,
+            (colors && colors[index]) || "transparent",
+            noHide,
+            item.offset
+          );
+        });
+      }
+      getChildren() {
+        return [...this.blocks];
+      }
+      show(indexs) {
+        const isArr = Array.isArray(indexs);
+        this.blocks.forEach((item, index) => {
+          if ((isArr && indexs.includes(index)) || index === indexs) {
+            item.showSelf();
+          } else {
+            item.hideSelf();
+          }
+        });
+      }
+      hide(indexs) {
+        const isArr = Array.isArray(indexs);
+        this.blocks.forEach((item, index) => {
+          if ((isArr && indexs.includes(index)) || index === indexs) {
+            item.hideSelf();
+          } else {
+            item.showSelf();
+          }
+        });
+      }
+    }
+
+    class Animate {
+      constructor(fn, direct) {
+        this.pool = [];
+        this.fn = fn;
+        this.active = false;
+        this.running = false;
+        this.direct = direct;
+      }
+      push(payload) {
+        this.running = true;
+        this.pool.push(payload);
+        this.check();
+      }
+      stop() {
+        this.running = false;
+      }
+      check() {
+        if (this.pool.length && !this.active) {
+          this.active = true;
+          window.requestAnimationFrame(this.done.bind(this));
+        }
+      }
+      done() {
+        const args = [...this.pool];
+        this.pool.length = 0;
+        if (this.running) {
+          this.fn(this.direct ? args.last() : args);
+          this.active = false;
+          this.check();
+        } else {
+          this.active = false;
+        }
+      }
+    }
+
+    // [<,-][田,T,刁,L,Z,厶,マ]
+    const bulks = {
+      "-2": {
+        points: [1040, 1002, 1004],
+        offset: [0.5, -0.5, -2.5],
+      },
+      "-1": {
+        points: [1004, 2004, 3004],
+        offset: [1, -1, -1.5],
+      },
+      0: {
+        points: [1040, 1020, 1004, 1002],
+        offset: [0.5, -0.5, -2.5],
+      },
+      1: {
+        points: [1020, 1004, 1002, 1001],
+        offset: [0, -0.5, -2.5],
+      },
+      2: {
+        points: [1040, 1020, 1004, 2040],
+        offset: [0.5, -0.5, -2],
+      },
+      3: {
+        points: [1040, 1004, 1002, 1001],
+        offset: [0, -0.5, -2.5],
+      },
+      4: {
+        points: [1040, 1020, 1002, 1001],
+        offset: [0, -0.5, -2.5],
+      },
+      5: {
+        points: [1040, 1020, 1004, 2020],
+        offset: [0.5, -0.5, -2],
+      },
+      6: {
+        points: [1040, 1020, 1004, 2004],
+        offset: [0.5, -0.5, -2],
+      },
+    };
+    class Bulk {
+      constructor(arr) {
+        this.hub = arr;
+      }
+      load(id) {
+        //
+      }
+    }
+
+    function createBlocks(str) {
+      //-1123456
+      str += "";
+      const arr = str.split("");
+      const b3 = -arr[1];
+      const b4s = str.slice;
+    }
+
+    function ready(fn) {
+      document.addEventListener(
+        "DOMContentLoaded",
+        function readyFn() {
+          document.removeEventListener("DOMContentLoaded", readyFn, false);
+          fn();
+        },
+        false
+      );
+    }
+
+    class TouchEvent {
+      constructor($body) {
+        this.hub = new WeakMap();
+        this.touches = {};
+        this.lock = false;
+        this.timer = null;
+        this.$body = $body;
+        $body.ontouchstart = this.startHandle.bind(this);
+        $body.ontouchend = this.endHandle.bind(this);
+        $body.ontouchmove = this.moveHandle.bind(this);
+        $body.ontouchcancel = this.cancelHandle.bind(this);
+      }
+      register(payload) {
+        const { el, ...events } = payload;
+        const oldObj = this.hub.get(el) || { combo: 0, lastDate: null };
+        for (let eventName in events) {
+          const value = events[eventName];
+          if (eventName === "click" || eventName === "press") {
+            oldObj[eventName] = oldObj[eventName] || {};
+            oldObj[eventName][value[0]] = value.slice(1);
+          } else {
+            oldObj[eventName] = value;
+          }
+        }
+        this.hub.set(el, oldObj);
+      }
+      startHandle(event) {
+        if (this.lock) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        const nowDate = new Date().getTime();
+        Array.prototype.forEach.call(event.changedTouches, (item) => {
+          const { pageX, pageY, identifier, target } = item;
+          if (!this.touches[identifier]) {
+            let events;
+            let _target = target;
+            while (!0) {
+              if (this.hub.has(_target)) {
+                events = this.hub.get(_target);
+                break;
+              } else if (_target === document.documentElement) {
+                break;
+              } else {
+                _target = _target.parentNode;
               }
-              this.timer = timeFn()
+            }
+            if (events) {
+              const touch = {
+                pageX: null,
+                pageY: null,
+                status: TouchEvent.STATUS_DOWN,
+                events,
+                startDate: new Date().getTime(),
+              };
+              if (
+                touch.events.lastDate &&
+                nowDate - touch.events.lastDate >= TouchEvent.COMBO_DELAY
+              ) {
+                touch.events.combo = 0;
+              }
+              touch.events.lastDate = nowDate;
+              this.touches[identifier] = touch;
+              if (events.start) {
+                events.start.bind(touch)(pageX, pageY);
+              }
+              if (events.press) {
+                const timeArr = Object.keys(events.press);
+                const _this = this;
+                function timeFn() {
+                  if (timeArr.length) {
+                    const time = timeArr.shift();
+                    return setTimeout(() => {
+                      const [fn, bubble] = events.press[time];
+                      if (bubble) {
+                        _this.timer = timeFn();
+                      } else {
+                        _this.timer = null;
+                      }
+                      fn();
+                    }, time);
+                  } else {
+                    return null;
+                  }
+                }
+                this.timer = timeFn();
+              }
             }
           }
-        }
-      })
-    }
-    moveHandle(event) {
-      if (this.lock) {
-        return
+        });
       }
-      // event.preventDefault()
-      event.stopPropagation()
-      if (this.timer !== null) {
-        clearTimeout(this.timer)
-      }
-      Array.prototype.forEach.call(event.changedTouches, item => {
-        const { pageX, pageY, identifier } = item
-        const touch = this.touches[identifier]
-        if (!touch) {
-          return
+      moveHandle(event) {
+        if (this.lock) {
+          return;
         }
-        touch.status = TouchEvent.STATUS_MOVE
-        if (touch.events.move && touch.pageX !== null) {
-          touch.events.move.bind(touch)(pageX, pageY)
+        // event.preventDefault()
+        event.stopPropagation();
+        if (this.timer !== null) {
+          clearTimeout(this.timer);
         }
-        touch.pageX = pageX
-        touch.pageY = pageY
-      })
-    }
-    endHandle(event) {
-      if (this.lock) {
-        return
+        Array.prototype.forEach.call(event.changedTouches, (item) => {
+          const { pageX, pageY, identifier } = item;
+          const touch = this.touches[identifier];
+          if (!touch) {
+            return;
+          }
+          touch.status = TouchEvent.STATUS_MOVE;
+          if (touch.events.move && touch.pageX !== null) {
+            touch.events.move.bind(touch)(pageX, pageY);
+          }
+          touch.pageX = pageX;
+          touch.pageY = pageY;
+        });
       }
-      event.preventDefault()
-      event.stopPropagation()
-      if (this.timer !== null) {
-        clearTimeout(this.timer)
-      }
-      const nowDate = new Date().getTime()
-      Array.prototype.forEach.call(event.changedTouches, item => {
-        const { pageX, pageY, identifier } = item
-        const touch = this.touches[identifier]
-        if (!touch) {
-          return
+      endHandle(event) {
+        if (this.lock) {
+          return;
         }
-        const derDate = nowDate - touch.events.lastDate
-        let execed = false
-        if (touch.status === TouchEvent.STATUS_MOVE) {
-          touch.events.combo = 0
-        } else if (touch.status === TouchEvent.STATUS_DOWN) {
-          if (touch.events.combo === 0) {
-            if (derDate >= TouchEvent.COMBO_DELAY) {
-              /* const pressKey = touch.events.press && Object.keys(touch.events.press).numSort()
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.timer !== null) {
+          clearTimeout(this.timer);
+        }
+        const nowDate = new Date().getTime();
+        Array.prototype.forEach.call(event.changedTouches, (item) => {
+          const { pageX, pageY, identifier } = item;
+          const touch = this.touches[identifier];
+          if (!touch) {
+            return;
+          }
+          const derDate = nowDate - touch.events.lastDate;
+          let execed = false;
+          if (touch.status === TouchEvent.STATUS_MOVE) {
+            touch.events.combo = 0;
+          } else if (touch.status === TouchEvent.STATUS_DOWN) {
+            if (touch.events.combo === 0) {
+              if (derDate >= TouchEvent.COMBO_DELAY) {
+                /* const pressKey = touch.events.press && Object.keys(touch.events.press).numSort()
               if (pressKey) {
                 let tempDate = null
                 for (let i = 0; i < pressKey.length; i++) {
@@ -1070,414 +1143,530 @@
                   touch.events.press[tempDate].bind(touch)()
                 }
               } */
-            } else {
-              touch.events.combo += 1
-            }
-          } else {
-            if (derDate >= TouchEvent.COMBO_DELAY) {
-              touch.events.combo = 0
-            } else {
-              touch.events.combo += 1
-            }
-          }
-          if (touch.events.combo > 0 && touch.events.click && touch.events.click[touch.events.combo] && touch.events.click[touch.events.combo][0]) {
-            execed = true
-            touch.events.click[touch.events.combo][0].bind(touch)()
-          }
-        }
-        touch.events.lastDate = nowDate
-        if (touch.events.end && !execed) {
-          touch.events.end.bind(touch)(pageX, pageY)
-        }
-        delete this.touches[identifier]
-      })
-    }
-    cancelHandle(event) {
-      if (this.timer !== null) {
-        clearTimeout(this.timer)
-      }
-      console.log('cancel:', event)
-    }
-  }
-  TouchEvent.STATUS_DOWN = 0;
-  TouchEvent.STATUS_MOVE = 1;
-  TouchEvent.COMBO_DELAY = 500;
-  function translation(len, fn, time, r = 0) {
-    function dx(dt) {
-      return (2 * v - dt * a) * dt / 2
-    }
-    function rafCallBack(timestamp) {
-      !start && (start = timestamp)
-      const dt = timestamp - start
-      start = timestamp
-      if (dt) {
-        const dlen = dx(dt)
-        fn(dlen)
-        len -= dlen
-        time -= dt
-        v -= dt * a
-      }
-      if (time > dt) {
-        window.requestAnimationFrame(rafCallBack)
-      } else {
-        fn(len, true)
-        resolve()
-      }
-    }
-    /* const maxA = 2 * len / time ** 2
-    a = Math.min(maxA, a)
-    let v = time * a / 2 + len / time */
-    const maxV = len / time
-    // v0 = Math.min(maxV, v0)
-    const v0 = (r > 1 ? 1 : r) * maxV
-    a = 2 * (maxV - v0) / time
-    let v = time * a / 2 + len / time
-    let start = null
-    let resolve
-    return new Promise(r => {
-      resolve = r
-      window.requestAnimationFrame(rafCallBack)
-    })
-  }
-
-  ready(function () {
-    ReactData.$body = document.body
-    ReactData.$main = document.querySelector('.main')
-    ReactData.$mainTouch = document.querySelector('.main-touch')
-    ReactData.$byTouch = document.querySelector('.deputy-touch')
-    ReactData.$ring = document.querySelector('.ring')
-    ReactData.$roulette = document.querySelector('.roulette')
-    ReactData.$contact = document.querySelector('.contact')
-    ReactData.$rocker = document.querySelector('.rocker')
-    ReactData.$pb = document.querySelector('.perspective')
-    ReactData.$ct = document.querySelector('.container')
-    ReactData.$varStyle = document.querySelector('#var-style')
-    ReactData.$fixed = document.querySelector('.fixed')
-    ReactData.$local = {
-      translate: document.querySelector('.local .main-translate'),
-      rotation: document.querySelector('.local .main-rotation'),
-      container: document.querySelector('.local .main-container'),
-    }
-    ReactData.$virtual = {
-      translate: document.querySelector('.virtual .main-translate'),
-      rotation: document.querySelector('.virtual .main-rotation'),
-      container: document.querySelector('.virtual .main-container'),
-    }
-    const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled
-    let isFullscreen = false
-    document.body.onfullscreenchange = function (event) {
-      let elem = event.target
-      isFullscreen = document.fullscreenElement === elem
-
-    }
-    document.oncontextmenu = function (event) {
-      event.preventDefault()
-    }
-    window.onresize = function (event) {
-      ReactData.resize()
-    }
-    const { $body, $main, $pb, $ct, $fixed, $mainTouch, $byTouch, $ring, $roulette, $contact, $rocker, $local, $virtual } = ReactData
-    let r = 1
-    let startPos = null
-    // let posRotate = [75, -20]
-    const R = function ([x, y, z]) {
-      const r = (x ** 2 + y ** 2 + z ** 2) ** 0.5
-      return [x / r, y / r, z / r]
-    }
-    const D = function (a, b) {
-      return a.map((item, index) => item - b[index])
-    }
-    let posRotate = null
-    const $info = document.getElementById('info')
-    const $nv = document.getElementById('n-vector')
-    window.M = function (dx, dy) {
-      const K = getK(dx, dy, 20)
-      posRotate = posRotate ? vector4(posRotate, K) : K
-      const [x, y, z, a] = posRotate
-      $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
-      const j = 90 / (x ** 2 + y ** 2 + z ** 2) ** 0.5
-      $nv.style.transform = `translate3d(${x * j}px,${-y * j}px,${z * j}px)`
-      $info.innerText = `dx:${dx.toFixed(3)},  dy${dy.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
-    }
-    window.time = (delay, arr) => {
-      window.setTimeout(() => {
-        window.M(...arr)
-        window.time.loop && window.time(delay, arr)
-      }, delay)
-    }
-    function rotateMove(args) {
-      // const [x, y, z, a] = args.reduce((a, b) => a + b)
-      const [x, y, z, a] = args.last()
-      $virtual.rotation.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
-      // $info.innerText = `x:${x.toFixed(3)},  y${y.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
-    }
-    const mainAnimate = new Animate(rotateMove)
-    if ($pb) {
-      const touch = new TouchEvent($body)
-      touch.register({
-        el: $mainTouch,
-        click: [3, async function () {
-          if (this.events.combo === 3) {
-            if (fullscreenEnabled) {
-              if (!isFullscreen) {
-                await document.body.requestFullscreen()
               } else {
-                await document.exitFullscreen()
+                touch.events.combo += 1;
+              }
+            } else {
+              if (derDate >= TouchEvent.COMBO_DELAY) {
+                touch.events.combo = 0;
+              } else {
+                touch.events.combo += 1;
               }
             }
+            if (
+              touch.events.combo > 0 &&
+              touch.events.click &&
+              touch.events.click[touch.events.combo] &&
+              touch.events.click[touch.events.combo][0]
+            ) {
+              execed = true;
+              touch.events.click[touch.events.combo][0].bind(touch)();
+            }
           }
-        }],
-        move(pageX, pageY) {
-          /* posRotate[1] -= ((pageX - this.pageX) * r).toFixed(2)
+          touch.events.lastDate = nowDate;
+          if (touch.events.end && !execed) {
+            touch.events.end.bind(touch)(pageX, pageY);
+          }
+          delete this.touches[identifier];
+        });
+      }
+      cancelHandle(event) {
+        if (this.timer !== null) {
+          clearTimeout(this.timer);
+        }
+        console.log("cancel:", event);
+      }
+    }
+    TouchEvent.STATUS_DOWN = 0;
+    TouchEvent.STATUS_MOVE = 1;
+    TouchEvent.COMBO_DELAY = 500;
+    function translation(len, fn, time, r = 0) {
+      function dx(dt) {
+        return ((2 * v - dt * a) * dt) / 2;
+      }
+      function rafCallBack(timestamp) {
+        !start && (start = timestamp);
+        const dt = timestamp - start;
+        start = timestamp;
+        if (dt) {
+          const dlen = dx(dt);
+          fn(dlen);
+          len -= dlen;
+          time -= dt;
+          v -= dt * a;
+        }
+        if (time > dt) {
+          window.requestAnimationFrame(rafCallBack);
+        } else {
+          fn(len, true);
+          resolve();
+        }
+      }
+      /* const maxA = 2 * len / time ** 2
+    a = Math.min(maxA, a)
+    let v = time * a / 2 + len / time */
+      const maxV = len / time;
+      // v0 = Math.min(maxV, v0)
+      const v0 = (r > 1 ? 1 : r) * maxV;
+      a = (2 * (maxV - v0)) / time;
+      let v = (time * a) / 2 + len / time;
+      let start = null;
+      let resolve;
+      return new Promise((r) => {
+        resolve = r;
+        window.requestAnimationFrame(rafCallBack);
+      });
+    }
+
+    ready(function () {
+      ReactData.$body = document.body;
+      ReactData.$main = document.querySelector(".main");
+      ReactData.$mainTouch = document.querySelector(".main-touch");
+      ReactData.$byTouch = document.querySelector(".deputy-touch");
+      ReactData.$ring = document.querySelector(".ring");
+      ReactData.$roulette = document.querySelector(".roulette");
+      ReactData.$contact = document.querySelector(".contact");
+      ReactData.$rocker = document.querySelector(".rocker");
+      ReactData.$pb = document.querySelector(".perspective");
+      ReactData.$ct = document.querySelector(".container");
+      ReactData.$varStyle = document.querySelector("#var-style");
+      ReactData.$fixed = document.querySelector(".fixed");
+      ReactData.$local = {
+        translate: document.querySelector(".local .main-translate"),
+        rotation: document.querySelector(".local .main-rotation"),
+        container: document.querySelector(".local .main-container"),
+      };
+      ReactData.$virtual = {
+        translate: document.querySelector(".virtual .main-translate"),
+        rotation: document.querySelector(".virtual .main-rotation"),
+        container: document.querySelector(".virtual .main-container"),
+      };
+      const fullscreenEnabled =
+        document.fullscreenEnabled || document.mozFullScreenEnabled;
+      let isFullscreen = false;
+      document.body.onfullscreenchange = function (event) {
+        let elem = event.target;
+        isFullscreen = document.fullscreenElement === elem;
+      };
+      document.oncontextmenu = function (event) {
+        event.preventDefault();
+      };
+      window.onresize = function (event) {
+        ReactData.resize();
+      };
+      const {
+        $body,
+        $main,
+        $pb,
+        $ct,
+        $fixed,
+        $mainTouch,
+        $byTouch,
+        $ring,
+        $roulette,
+        $contact,
+        $rocker,
+        $local,
+        $virtual,
+      } = ReactData;
+      let r = 1;
+      let startPos = null;
+      // let posRotate = [75, -20]
+      const R = function ([x, y, z]) {
+        const r = (x ** 2 + y ** 2 + z ** 2) ** 0.5;
+        return [x / r, y / r, z / r];
+      };
+      const D = function (a, b) {
+        return a.map((item, index) => item - b[index]);
+      };
+      let posRotate = null;
+      const $info = document.getElementById("info");
+      const $nv = document.getElementById("n-vector");
+      window.M = function (dx, dy) {
+        const K = getK(dx, dy, 20);
+        posRotate = posRotate ? vector4(posRotate, K) : K;
+        const [x, y, z, a] = posRotate;
+        $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(",")}rad)`;
+        const j = 90 / (x ** 2 + y ** 2 + z ** 2) ** 0.5;
+        $nv.style.transform = `translate3d(${x * j}px,${-y * j}px,${z * j}px)`;
+        $info.innerText = `dx:${dx.toFixed(3)},  dy${dy.toFixed(
+          3
+        )}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(
+          3
+        )}rad]]`;
+      };
+      window.time = (delay, arr) => {
+        window.setTimeout(() => {
+          window.M(...arr);
+          window.time.loop && window.time(delay, arr);
+        }, delay);
+      };
+      function rotateMove(args) {
+        // const [x, y, z, a] = args.reduce((a, b) => a + b)
+        const [x, y, z, a] = args.last();
+        $virtual.rotation.style.transform = `rotate3d(${[x, -y, z, -a].join(
+          ","
+        )}rad)`;
+        // $info.innerText = `x:${x.toFixed(3)},  y${y.toFixed(3)}:, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]`
+      }
+      const mainAnimate = new Animate(rotateMove);
+      if ($pb) {
+        const touch = new TouchEvent($body);
+        touch.register({
+          el: $mainTouch,
+          click: [
+            3,
+            async function () {
+              if (this.events.combo === 3) {
+                if (fullscreenEnabled) {
+                  if (!isFullscreen) {
+                    await document.body.requestFullscreen();
+                  } else {
+                    await document.exitFullscreen();
+                  }
+                }
+              }
+            },
+          ],
+          move(pageX, pageY) {
+            /* posRotate[1] -= ((pageX - this.pageX) * r).toFixed(2)
           posRotate[0] -= ((pageY - this.pageY) * r).toFixed(2)
           $pb.style.transform = `rotateX(${posRotate[0]}deg) rotateZ(${posRotate[1]}deg)` */
-          const dx = pageX - this.pageX
-          const dy = pageY - this.pageY
-          const K = getK(dx, dy, 40)
-          posRotate = posRotate ? vector4(posRotate, K) : K
-          mainAnimate.push(posRotate)
+            const dx = pageX - this.pageX;
+            const dy = pageY - this.pageY;
+            const K = getK(dx, dy, 40);
+            posRotate = posRotate ? vector4(posRotate, K) : K;
+            mainAnimate.push(posRotate);
 
-          /* const [l1, l2, l3] = posRotate
+            /* const [l1, l2, l3] = posRotate
           posRotate = rotVector(posRotate, getK(dx, dy, 20))
           const [x, y, z, a] = rotate3d([0, 0, 1], posRotate)
           $pb.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
           $info.innerText = `dx:${dx.toFixed(3)},  dy${y.toFixed(3)}:,  v:[${l1.toFixed(3)},${l2.toFixed(3)},${l3.toFixed(3)}, rot:[${x.toFixed(3)},${-y.toFixed(3)},${z.toFixed(3)},${a.toFixed(3)}rad]]` */
-        },
-        end() {
-          if (this.status === TouchEvent.STATUS_DOWN) return
-          mainAnimate.stop()
-          const [[x, y, z, a], v0, c0] = getCorrectRot(posRotate, deg2rot3d([0, -15], [1, -10]))
-          ReactData.mainQuadrature = [...c0]
-          // rotateMove([vector4(posRotate, [x, y, z, a])])
-          let countA = 0
-          translation(a, (angle) => {
-            countA += angle
-            const v = vector4(posRotate, [x, y, z, countA], true)
-            mainAnimate.push(v[3] === 0 ? v0 : v)
-          }, 300, 0.5).then(() => {
-            posRotate = v0
-          })
-        }
-      })
+          },
+          end() {
+            if (this.status === TouchEvent.STATUS_DOWN) return;
+            mainAnimate.stop();
+            const [[x, y, z, a], v0, c0] = getCorrectRot(
+              posRotate,
+              deg2rot3d([0, -15], [1, -10])
+            );
+            ReactData.mainQuadrature = [...c0];
+            // rotateMove([vector4(posRotate, [x, y, z, a])])
+            let countA = 0;
+            translation(
+              a,
+              (angle) => {
+                countA += angle;
+                const v = vector4(posRotate, [x, y, z, countA], true);
+                mainAnimate.push(v[3] === 0 ? v0 : v);
+              },
+              300,
+              0.5
+            ).then(() => {
+              posRotate = v0;
+            });
+          },
+        });
 
+        const $swiper = document.querySelector(".swiper");
+        const screen = window.screen;
+        const $height = screen.availHeight;
+        const $width = screen.availWidth;
+        const fixWidth = $width * 0.3; //a
+        const baseHeight = ($height - fixWidth) / 2;
+        const baseWidth =
+          (baseHeight < fixWidth ? baseHeight : fixWidth * 0.6).toFixed(5) - 0; //b
+        let distance = 0;
 
-      const $swiper = document.querySelector('.swiper')
-      const screen = window.screen
-      const $height = screen.availHeight
-      const $width = screen.availWidth
-      const fixWidth = $width * 0.3 //a
-      const baseHeight = ($height - fixWidth) / 2
-      const baseWidth = (baseHeight < fixWidth ? baseHeight : fixWidth * 0.6).toFixed(5) - 0 //b
-      let distance = 0
+        const exhibit = new ACB($fixed.children[0], (fixWidth / 5) | 0);
+        if ($swiper) {
+          const setTranslate = function (border = false) {
+            if (border) {
+              distance = distance.toFixed(5) - 0;
+            }
+            const isDown = distance > 0;
+            const len = byChildren.length;
+            const baseIndex = (len / 2) | 0;
+            const indexDelta = (distance / baseWidth) | 0;
+            const offset = distance % baseWidth; //c
+            const offsetBase = (fixWidth - baseWidth) / 2;
+            const rate = (fixWidth * offset) / baseWidth;
+            distance = offset;
+            if (indexDelta) {
+              if (indexDelta > 0) {
+                byChildren.splice(
+                  0,
+                  0,
+                  ...byChildren.splice(len - indexDelta, indexDelta)
+                );
+              } else {
+                byChildren.splice(len, 0, ...byChildren.splice(0, -indexDelta));
+              }
+            }
+            byChildren.forEach((item, index) => {
+              const scrollLayer = item.scrollLayer;
+              const baseTop =
+                (index - baseIndex) * baseWidth +
+                (index < baseIndex ? -offsetBase : offsetBase);
+              if (isDown) {
+                if (index === baseIndex - 1) {
+                  const $scale = (baseWidth - offset + rate) / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    baseTop + (offset + rate) / 2
+                  }px) scale(${$scale},${$scale});`;
+                } else if (index === baseIndex) {
+                  const $scale = (fixWidth + offset - rate) / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    (offset + rate) / 2
+                  }px) scale(${$scale},${$scale});`;
+                } else {
+                  const $scale = baseWidth / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    baseTop + offset
+                  }px) scale(${$scale},${$scale});`;
+                }
+              } else {
+                if (index === baseIndex + 1) {
+                  const $scale = (baseWidth + offset - rate) / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    baseTop + (rate + offset) / 2
+                  }px) scale(${$scale},${$scale});`;
+                } else if (index === baseIndex) {
+                  const $scale = (fixWidth - offset + rate) / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    (rate + offset) / 2
+                  }px) scale(${$scale},${$scale});`;
+                } else {
+                  const $scale = baseWidth / fixWidth;
+                  scrollLayer.style.cssText = `transform:translateY(${
+                    baseTop + offset
+                  }px) scale(${$scale},${$scale});`;
+                }
+              }
+            });
+            if (border) {
+              center.scrollLayer.classList.remove("center");
+              center = byChildren[baseIndex];
+              center.scrollLayer.classList.add("center");
+            }
+          };
 
-      const exhibit = new ACB($fixed.children[0], fixWidth / 5 | 0)
-      if ($swiper) {
-        const setTranslate = function (border = false) {
-          if (border) {
-            distance = distance.toFixed(5) - 0
-          }
-          const isDown = distance > 0
-          const len = byChildren.length
-          const baseIndex = len / 2 | 0
-          const indexDelta = distance / baseWidth | 0
-          const offset = distance % baseWidth //c
-          const offsetBase = (fixWidth - baseWidth) / 2
-          const rate = fixWidth * offset / baseWidth
-          distance = offset
-          if (indexDelta) {
-            if (indexDelta > 0) {
-              byChildren.splice(0, 0, ...byChildren.splice(len - indexDelta, indexDelta))
+          const byMove = function (pageX, pageY) {
+            if (mode === 0) {
+              distance += ((pageY - this.pageY) * baseWidth * 2) / $height;
+              setTranslate();
+            } else if (mode === 1) {
+              const dx = pageX - this.pageX;
+              const dy = pageY - this.pageY;
+              const k = getK(dx, dy, 20);
+              center.rotateAngle = center.rotateAngle
+                ? vector4(center.rotateAngle, k)
+                : k;
+              byAnimate.push(center.rotateAngle);
+            }
+          };
+
+          const byEnd = async function () {
+            this.lock = true;
+            if (mode === 0) {
+              if (distance > 0) {
+                if (distance > baseWidth / 2) {
+                  await translation(
+                    baseWidth - distance,
+                    (dy, done) => {
+                      distance += dy;
+                      setTranslate(done);
+                    },
+                    300,
+                    0.5
+                  );
+                } else {
+                  await translation(
+                    distance,
+                    (dy, done) => {
+                      distance -= dy;
+                      setTranslate(done);
+                    },
+                    300,
+                    0.5
+                  );
+                }
+              } else if (distance < 0) {
+                if (-distance > baseWidth / 2) {
+                  await translation(
+                    baseWidth + distance,
+                    (dy, done) => {
+                      distance -= dy;
+                      setTranslate(done);
+                    },
+                    300,
+                    0.5
+                  );
+                } else {
+                  await translation(
+                    -distance,
+                    (dy, done) => {
+                      distance += dy;
+                      setTranslate(done);
+                    },
+                    300,
+                    0.5
+                  );
+                }
+              }
+            }
+            this.lock = false;
+          };
+
+          const byClick = function () {
+            mode = mode === 1 ? 0 : 1;
+            if (mode === 1) {
+              center.scrollLayer.classList.remove("center");
+              center = byChildren[(byChildren.length / 2) | 0];
+              center.scrollLayer.classList.add("center");
+              $ring.className = "ring active";
             } else {
-              byChildren.splice(len, 0, ...byChildren.splice(0, -indexDelta))
+              center.scrollLayer.classList.remove("center");
+              $ring.className = "ring";
             }
-          }
-          byChildren.forEach((item, index) => {
-            const scrollLayer = item.scrollLayer
-            const baseTop = (index - baseIndex) * baseWidth + (index < baseIndex ? -offsetBase : offsetBase)
-            if (isDown) {
-              if (index === baseIndex - 1) {
-                const $scale = (baseWidth - offset + rate) / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${baseTop + (offset + rate) / 2}px) scale(${$scale},${$scale});`
-              } else if (index === baseIndex) {
-                const $scale = (fixWidth + offset - rate) / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${(offset + rate) / 2}px) scale(${$scale},${$scale});`
-              } else {
-                const $scale = baseWidth / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
-              }
+          };
+
+          const byPress = function () {
+            mode = mode === 2 ? 0 : 2;
+            if (mode === 2) {
+              $ring.className = "ring move";
+              byAnimate.stop();
+              center.rotateAngle = center.rotateAngle || [0, 0, 1, 0];
+              const [[x, y, z, a], v0, c0] = getCorrectRot(
+                center.rotateAngle,
+                deg2rot3d([0, -15], [1, -10])
+              );
+              let countA = 0;
+              translation(
+                a,
+                (angle) => {
+                  countA += angle;
+                  const v = vector4(
+                    center.rotateAngle,
+                    [x, y, z, countA],
+                    true
+                  );
+                  byAnimate.push(v[3] === 0 ? v0 : v);
+                },
+                300,
+                0.5
+              ).then(() => (center.rotateAngle = v0));
+              $roulette.classList.add("active");
+              // const c1 = coordinateExchangeRule(c0)
+              // const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
+              const MinRest = [2, 2, 2];
+              const MaxRest = [2, 2, 2];
+              const c = Object.keys(center.hub).map((point) => {
+                const res = coordinateExchangeRule(
+                  c0,
+                  points[point].coordinate
+                );
+                res.forEach((item, index) => {
+                  MinRest[index] = Math.min(1 - item, MinRest[index]);
+                  MaxRest[index] = Math.min(1 + item, MaxRest[index]);
+                });
+                return res;
+              });
+              projection.minRest = MinRest;
+              projection.maxRest = MaxRest;
+              const n1 = c.map(
+                (item) =>
+                  coordinates[
+                    item
+                      .map((item$, index$) => item$ + MinRest[index$])
+                      .join("")
+                  ]
+              );
+              projection.render(n1, center.bgColor);
             } else {
-              if (index === baseIndex + 1) {
-                const $scale = (baseWidth + offset - rate) / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${baseTop + (rate + offset) / 2}px) scale(${$scale},${$scale});`
-              } else if (index === baseIndex) {
-                const $scale = (fixWidth - offset + rate) / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${(rate + offset) / 2}px) scale(${$scale},${$scale});`
-              } else {
-                const $scale = baseWidth / fixWidth
-                scrollLayer.style.cssText = `transform:translateY(${baseTop + offset}px) scale(${$scale},${$scale});`
-              }
+              $ring.className = "ring";
+              $roulette.classList.remove("active");
             }
-          })
-          if (border) {
-            center.scrollLayer.classList.remove('center')
-            center = byChildren[baseIndex]
-            center.scrollLayer.classList.add('center')
+          };
+
+          function rotateMove(args) {
+            const [x, y, z, a] = args.last();
+            center.perspectiveLayer.style.transform = `rotate3d(${[
+              x,
+              -y,
+              z,
+              -a,
+            ].join(",")}rad)`;
           }
-        }
+          const byAnimate = new Animate(rotateMove);
 
-        const byMove = function (pageX, pageY) {
-          if (mode === 0) {
-            distance += (pageY - this.pageY) * baseWidth * 2 / $height
-            setTranslate()
-          } else if (mode === 1) {
-            const dx = pageX - this.pageX
-            const dy = pageY - this.pageY
-            const k = getK(dx, dy, 20)
-            center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, k) : k
-            byAnimate.push(center.rotateAngle)
-          }
-        }
-
-        const byEnd = async function () {
-          this.lock = true
-          if (mode === 0) {
-            if (distance > 0) {
-              if (distance > baseWidth / 2) {
-                await translation(baseWidth - distance, (dy, done) => {
-                  distance += dy
-                  setTranslate(done)
-                }, 300, 0.5)
-              } else {
-                await translation(distance, (dy, done) => {
-                  distance -= dy
-                  setTranslate(done)
-                }, 300, 0.5)
-              }
-            } else if (distance < 0) {
-              if (-distance > baseWidth / 2) {
-                await translation(baseWidth + distance, (dy, done) => {
-                  distance -= dy
-                  setTranslate(done)
-                }, 300, 0.5)
-              } else {
-                await translation(-distance, (dy, done) => {
-                  distance += dy
-                  setTranslate(done)
-                }, 300, 0.5)
-              }
-            }
-          }
-          this.lock = false
-        }
-
-        const byClick = function () {
-          mode = mode === 1 ? 0 : 1
-          if (mode === 1) {
-            center.scrollLayer.classList.remove('center')
-            center = byChildren[byChildren.length / 2 | 0]
-            center.scrollLayer.classList.add('center')
-            $ring.className = 'ring active'
-          } else {
-            center.scrollLayer.classList.remove('center')
-            $ring.className = 'ring'
-          }
-        }
-
-        const byPress = function () {
-          mode = mode === 2 ? 0 : 2
-          if (mode === 2) {
-            $ring.className = 'ring move'
-            byAnimate.stop()
-            center.rotateAngle = center.rotateAngle || [0, 0, 1, 0]
-            const [[x, y, z, a], v0, c0] = getCorrectRot(center.rotateAngle, deg2rot3d([0, -15], [1, -10]))
-            let countA = 0
-            translation(a, angle => {
-              countA += angle
-              const v = vector4(center.rotateAngle, [x, y, z, countA], true)
-              byAnimate.push(v[3] === 0 ? v0 : v)
-            }, 300, 0.5).then(() => center.rotateAngle = v0)
-            $roulette.classList.add('active')
-            // const c1 = coordinateExchangeRule(c0)
-            // const c2 = coordinateExchangeRule(ReactData.mainQuadrature || [1, 0, 0, 0])
-            const MinRest = [2, 2, 2]
-            const MaxRest = [2, 2, 2]
-            const c = Object.keys(center.hub).map(point => {
-              const res = coordinateExchangeRule(c0, points[point].coordinate)
-              res.forEach((item, index) => {
-                MinRest[index] = Math.min(1 - item, MinRest[index])
-                MaxRest[index] = Math.min(1 + item, MaxRest[index])
-              })
-              return res
-            })
-            projection.minRest = MinRest
-            projection.maxRest = MaxRest
-            const n1 = c.map(item => coordinates[item.map((item$, index$) => item$ + MinRest[index$]).join('')])
-            projection.render(n1, center.bgColor)
-          } else {
-            $ring.className = 'ring'
-            $roulette.classList.remove('active')
-          }
-        }
-
-        function rotateMove(args) {
-          const [x, y, z, a] = args.last()
-          center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
-        }
-        const byAnimate = new Animate(rotateMove)
-
-        const byChildren = exhibit.getChildren()
-        let mode = 0 //0:scroll; 1:rotate; 2:move;
-        let center = byChildren[byChildren.length / 2 | 0]
-        setTranslate()
-        touch.register({
-          el: $byTouch,
-          move: byMove,
-          end: byEnd,
-          click: [2, byClick],
-          press: [500, byPress]
-        })
-
-        ReactData.bindResizeDate(['byWidth', 'ringCenter'], () => {
-          const { width: byWidth, height: byHeight, top: byTop, left: byLeft } = $byTouch.getBoundingClientRect()
-          return [byWidth, { top: byHeight / 2, left: byLeft + byWidth / 2 }]
-        })
-        if ($ring) {
-          let ringStart = 0
-          let ringAngle = 0
-          const ringAnimate = new Animate(res => $ring.style.transform = `rotate(${res}rad)`)
-          const getTanAngle = (y, x) => {
-            return Math.PI - Math.atan2(y, x)
-          }
+          const byChildren = exhibit.getChildren();
+          let mode = 0; //0:scroll; 1:rotate; 2:move;
+          let center = byChildren[(byChildren.length / 2) | 0];
+          setTranslate();
           touch.register({
-            el: $ring,
-            start() {
-              if (mode === 1) {
-                $ring.classList.add('touch')
-              }
-            },
-            move(pageX, pageY) {
-              if (mode === 1) {
-                if (!ringStart) {
-                  ringStart = getTanAngle(ReactData.ringCenter.top - pageY, pageX - ReactData.ringCenter.left)
-                  return
+            el: $byTouch,
+            move: byMove,
+            end: byEnd,
+            click: [2, byClick],
+            press: [500, byPress],
+          });
+
+          ReactData.bindResizeDate(["byWidth", "ringCenter"], () => {
+            const {
+              width: byWidth,
+              height: byHeight,
+              top: byTop,
+              left: byLeft,
+            } = $byTouch.getBoundingClientRect();
+            return [byWidth, { top: byHeight / 2, left: byLeft + byWidth / 2 }];
+          });
+          if ($ring) {
+            let ringStart = 0;
+            let ringAngle = 0;
+            const ringAnimate = new Animate(
+              (res) => ($ring.style.transform = `rotate(${res}rad)`)
+            );
+            const getTanAngle = (y, x) => {
+              return Math.PI - Math.atan2(y, x);
+            };
+            touch.register({
+              el: $ring,
+              start() {
+                if (mode === 1) {
+                  $ring.classList.add("touch");
                 }
-                const currentAngle = getTanAngle(ReactData.ringCenter.top - pageY, pageX - ReactData.ringCenter.left)
-                let deltaAngle = currentAngle - ringStart
-                const pi = Math.PI
-                const range = [0, pi, pi, 2 * pi]
-                if (deltaAngle / 2 / pi > 0.7) {
-                  deltaAngle -= 2 * pi
-                } else if (deltaAngle / 2 / pi < -0.7) {
-                  deltaAngle += 2 * pi
-                }
-                ringAngle += deltaAngle
-                if (ringAngle > pi) {
-                  ringAngle -= 2 * pi
-                } else if (ringAngle < -pi) {
-                  ringAngle += 2 * pi
-                }
-                ringStart = currentAngle
-                /* if (ringAngle > 2 * pi) {
+              },
+              move(pageX, pageY) {
+                if (mode === 1) {
+                  if (!ringStart) {
+                    ringStart = getTanAngle(
+                      ReactData.ringCenter.top - pageY,
+                      pageX - ReactData.ringCenter.left
+                    );
+                    return;
+                  }
+                  const currentAngle = getTanAngle(
+                    ReactData.ringCenter.top - pageY,
+                    pageX - ReactData.ringCenter.left
+                  );
+                  let deltaAngle = currentAngle - ringStart;
+                  const pi = Math.PI;
+                  const range = [0, pi, pi, 2 * pi];
+                  if (deltaAngle / 2 / pi > 0.7) {
+                    deltaAngle -= 2 * pi;
+                  } else if (deltaAngle / 2 / pi < -0.7) {
+                    deltaAngle += 2 * pi;
+                  }
+                  ringAngle += deltaAngle;
+                  if (ringAngle > pi) {
+                    ringAngle -= 2 * pi;
+                  } else if (ringAngle < -pi) {
+                    ringAngle += 2 * pi;
+                  }
+                  ringStart = currentAngle;
+                  /* if (ringAngle > 2 * pi) {
                   ringAngle -= 2 * pi
                 } else if (ringAngle < -2 * pi) {
                   ringAngle += 2 * pi
@@ -1488,133 +1677,172 @@
                 ringStart = currentAngle
                 console.log(ringAngle, range[rr] * -1 * da)
                 ringAngle += range[rr] * -1 * da */
-                $ring.style.transform = `rotate(${ringAngle}rad)`
-                if (deltaAngle) {
-                  center.rotateAngle = center.rotateAngle ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle]) : [0, 0, 1, -deltaAngle]
-                  const [x, y, z, a] = center.rotateAngle
-                  center.perspectiveLayer.style.transform = `rotate3d(${[x, -y, z, -a].join(',')}rad)`
+                  $ring.style.transform = `rotate(${ringAngle}rad)`;
+                  if (deltaAngle) {
+                    center.rotateAngle = center.rotateAngle
+                      ? vector4(center.rotateAngle, [0, 0, 1, -deltaAngle])
+                      : [0, 0, 1, -deltaAngle];
+                    const [x, y, z, a] = center.rotateAngle;
+                    center.perspectiveLayer.style.transform = `rotate3d(${[
+                      x,
+                      -y,
+                      z,
+                      -a,
+                    ].join(",")}rad)`;
+                  }
                 }
+              },
+              end() {
+                if (mode === 1) {
+                  $ring.classList.remove("touch");
+                  ringStart = null;
+                  translation(
+                    ringAngle,
+                    (a) => {
+                      ringAngle -= a;
+                      ringAnimate.push(ringAngle);
+                    },
+                    500,
+                    0.5
+                  ).then(() => {
+                    ringAnimate.stop();
+                    $ring.style.transform = `rotate(0rad)`;
+                    ringAngle = 0;
+                  });
+                }
+              },
+            });
+          }
+          if ($roulette) {
+            const rockerSite = [0, 0];
+            const rockerTranslate = (pageX, pageY) => {
+              const rockerMaxLen = (ReactData.byWidth * 8) / 30 - 2;
+              const offsetX = pageX - ReactData.ringCenter.left;
+              const offsetY = pageY - ReactData.ringCenter.top;
+              const rate =
+                ((offsetX ** 2 + offsetY ** 2) / rockerMaxLen ** 2) ** 0.5;
+              if (rate > 1) {
+                return [offsetX / rate, offsetY / rate, rate];
+              } else {
+                return [offsetX, offsetY, rate];
               }
-            },
-            end() {
-              if (mode === 1) {
-                $ring.classList.remove('touch')
-                ringStart = null
-                translation(ringAngle, a => {
-                  ringAngle -= a
-                  ringAnimate.push(ringAngle)
-                }, 500, 0.5).then(() => {
-                  ringAnimate.stop()
-                  $ring.style.transform = `rotate(0rad)`
-                  ringAngle = 0
-                })
-              }
-            }
-          })
-        }
-        if ($roulette) {
-          const rockerSite = [0, 0]
-          const rockerTranslate = (pageX, pageY) => {
-            const rockerMaxLen = ReactData.byWidth * 8 / 30 - 2
-            const offsetX = pageX - ReactData.ringCenter.left
-            const offsetY = pageY - ReactData.ringCenter.top
-            const rate = ((offsetX ** 2 + offsetY ** 2) / rockerMaxLen ** 2) ** 0.5
-            if (rate > 1) {
-              return [offsetX / rate, offsetY / rate, rate]
-            } else {
-              return [offsetX, offsetY, rate]
-            }
-          }
-          const rockerAnimate = new Animate(([px, py, r]) => {
-            rockerSite[0] = px
-            rockerSite[1] = py
-            r = r > 1 ? 1 : r
-            const a = Math.PI / 2 - Math.atan2(-py, px)
-            $contact.style.transform = `rotate(${a}rad) translateY(${-25 + (15 * r)}px)`
-            $rocker.style.transform = `translate(${px}px,${py}px)`
-          }, true)
-          touch.register({
-            el: $roulette,
-            start(pageX, pageY) {
-              $roulette.classList.add('touch')
-              rockerAnimate.push(rockerTranslate(pageX, pageY))
-            },
-            move(pageX, pageY) {
-              rockerAnimate.push(rockerTranslate(pageX, pageY))
-            },
-            end() {
-              let R = 1
-              $roulette.classList.remove('touch')
-              translation(1, r => {
-                R -= r
-                rockerAnimate.push([rockerSite[0] * R, rockerSite[1] * R, R])
-              }, 200, 0).then(() => {
-                rockerAnimate.stop()
-                $contact.style.transform = `rotate(0) translateY(-25px)`
-                $rocker.style.transform = `translate(0,0)`
-                rockerSite[0] = 0
-                rockerSite[1] = 0
-              })
-            }
-          })
-        }
-
-      }
-
-
-      const shadow = {
-        hub: {},
-        assembled: [],
-        actived: [],
-        rested: [],
-        init() {
-          this.rested.length = 0
-          this.actived.length = 0
-          this.assembled.length = 0
-          for (k in this.hub) {
-            this.rested.push(k)
-            // this.hub[k].style.background = '#4cbbf380'
-            // this.hub[k].style.background = 'transparent'
-          }
-        },
-        render() {
-          this.rested.forEach(item => this.hub[item].setGrid(this.rested))
-        }
-      }
-      const df = document.createDocumentFragment()
-      for (let f = 2; f >= 0; f--) {
-        for (let r = 0; r < 3; r++) {
-          for (let c = 0; c < 3; c++) {
-            str = (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r)
-            shadow.hub[str] = new SmallCube(df, [f, r, c])
+            };
+            const rockerAnimate = new Animate(([px, py, r]) => {
+              rockerSite[0] = px;
+              rockerSite[1] = py;
+              r = r > 1 ? 1 : r;
+              const a = Math.PI / 2 - Math.atan2(-py, px);
+              $contact.style.transform = `rotate(${a}rad) translateY(${
+                -25 + 15 * r
+              }px)`;
+              $rocker.style.transform = `translate(${px}px,${py}px)`;
+            }, true);
+            touch.register({
+              el: $roulette,
+              start(pageX, pageY) {
+                $roulette.classList.add("touch");
+                rockerAnimate.push(rockerTranslate(pageX, pageY));
+              },
+              move(pageX, pageY) {
+                rockerAnimate.push(rockerTranslate(pageX, pageY));
+              },
+              end() {
+                let R = 1;
+                $roulette.classList.remove("touch");
+                translation(
+                  1,
+                  (r) => {
+                    R -= r;
+                    rockerAnimate.push([
+                      rockerSite[0] * R,
+                      rockerSite[1] * R,
+                      R,
+                    ]);
+                  },
+                  200,
+                  0
+                ).then(() => {
+                  rockerAnimate.stop();
+                  $contact.style.transform = `rotate(0) translateY(-25px)`;
+                  $rocker.style.transform = `translate(0,0)`;
+                  rockerSite[0] = 0;
+                  rockerSite[1] = 0;
+                });
+              },
+            });
           }
         }
-      }
-      // shadow.hub['3001'] = new SmallCube(df, [0, 2, 2])
-      $virtual.container.appendChild(df)
-      shadow.init()
-      shadow.render()
-      exhibit.load([-1, 3, 6, 2, 5, 4, 1], ['rgb(255 0 0 /80%)', 'rgb(255 165 0 /80%)', 'rgb(255 255 0 /80%)', 'rgb(0 128 0 /80%)', 'rgb(0 255 255 /80%)', 'rgb(0 0 255 /80%)', 'rgb(128 0 128 /80%)'])
-      window.$ehb = exhibit
 
-      const pdf = document.createDocumentFragment()
-      const projection = {
-        minRest: [],
-        maxRest: [],
-        translate3d: [0, 0, 0],
-        rotate3d: [[0, -15], [1, -10]],
-        block: new Block(Array.from(Array(4), () => new SmallCube(pdf)), [], ReactData.size, $ct.children[0]),
-        render(numArr, color) {
-          this.block.init(numArr, color)
-        },
-        translate(x, y, z) {
-
+        const shadow = {
+          hub: {},
+          assembled: [],
+          actived: [],
+          rested: [],
+          init() {
+            this.rested.length = 0;
+            this.actived.length = 0;
+            this.assembled.length = 0;
+            for (k in this.hub) {
+              this.rested.push(k);
+              // this.hub[k].style.background = '#4cbbf380'
+              // this.hub[k].style.background = 'transparent'
+            }
+          },
+          render() {
+            this.rested.forEach((item) => this.hub[item].setGrid(this.rested));
+          },
+        };
+        const df = document.createDocumentFragment();
+        for (let f = 2; f >= 0; f--) {
+          for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+              str = (3 - f) * 1000 + [4, 2, 1][c] * 10 ** (2 - r);
+              shadow.hub[str] = new SmallCube(df, [f, r, c]);
+            }
+          }
         }
-      }
-      $local.container.appendChild(pdf)
-      // projection.render([1040, 1020, 1004, 2004], 'red')
-      // 创建操作区
-      /* function createOperationBlocks(num, blocks) {
+        // shadow.hub['3001'] = new SmallCube(df, [0, 2, 2])
+        $virtual.container.appendChild(df);
+        shadow.init();
+        shadow.render();
+        exhibit.load(
+          [-1, 3, 6, 2, 5, 4, 1],
+          [
+            "rgb(255 0 0 /80%)",
+            "rgb(255 165 0 /80%)",
+            "rgb(255 255 0 /80%)",
+            "rgb(0 128 0 /80%)",
+            "rgb(0 255 255 /80%)",
+            "rgb(0 0 255 /80%)",
+            "rgb(128 0 128 /80%)",
+          ]
+        );
+        window.$ehb = exhibit;
+
+        const pdf = document.createDocumentFragment();
+        const projection = {
+          minRest: [],
+          maxRest: [],
+          translate3d: [0, 0, 0],
+          rotate3d: [
+            [0, -15],
+            [1, -10],
+          ],
+          block: new Block(
+            Array.from(Array(4), () => new SmallCube(pdf)),
+            [],
+            ReactData.size,
+            $ct.children[0]
+          ),
+          render(numArr, color) {
+            this.block.init(numArr, color);
+          },
+          translate(x, y, z) {},
+        };
+        $local.container.appendChild(pdf);
+        projection.render([1040, 1020, 1004, 2004], "red");
+        // 创建操作区
+        /* function createOperationBlocks(num, blocks) {
         const ob = document.createElement('div')
         ob.className = 'operation-blocks'
         for (let i = 0; i < num; i++) {
@@ -1632,7 +1860,7 @@
 
       $fixed.appendChild(odf) */
 
-      /* ReactData.collection = {
+        /* ReactData.collection = {
         arr: [],
         load(data, colors, noHide) {
           this.show()
@@ -1660,7 +1888,7 @@
           })
         },
       } */
-    }
-  })
-</script>
+      }
+    });
+  </script>
 </html>

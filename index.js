@@ -1189,31 +1189,48 @@ const allBlockLetter = Object.fromEntries(
   Object.entries(SC2).map((e) => [e[0], getBoxModel(e[1])])
 );
 const findOnePiece = (arr = ["-1", 0, 1, 2, 3, 4, 5]) => {
-  const match = (si, letters, isT) => {
+  const sort = arr.map((e) => [
+    e,
+    allBlockLetter[e].translate.length,
+    allBlockLetter[e].hub.length,
+  ]);
+  const minTindex = sort.findIndex(
+    (t) => t[1] === Math.min(...sort.map((e) => e[1]))
+  );
+  const f = sort.splice(minTindex, 1)[0][0];
+  arr = [f, ...sort.sort((a, b) => a[2] - b[2]).map((e) => e[0])];
+  console.log(1197, arr);
+  const match = (letters, index) => {
+    const isT = !index;
+    const si = arr[index];
     const lettersArr = letters.join("").split("");
-    const res = allBlockLetter[si][isT ? "translate" : "hub"].filter(
-      (e) =>
-        !Array.prototype.find.call(e, (x) => lettersArr.find((y) => y === x))
-    );
-    return res.map((e) => [...letters, e]);
-  };
+    const res = allBlockLetter[si][isT ? "translate" : "hub"]
+      .filter(
+        (e) =>
+          !Array.prototype.find.call(e, (x) => lettersArr.find((y) => y === x))
+      )
+      .map((e) => [...letters, e]);
 
-  match(arr[0], [], true).forEach((e1) => {
-    match(arr[1], e1).forEach((e2) => {
-      match(arr[2], e2).forEach((e3) => {
-        match(arr[3], e3).forEach((e4) => {
-          match(arr[4], e4).forEach((e5) => {
-            match(arr[5], e5).forEach((e6) => {
-              const o = match(arr[6], e6);
-              if (o.length) {
-                console.log(1208, o[0]);
-                return;
-              }
-            });
-          });
-        });
-      });
+    if (index === arr.length - 1) {
+      if (res.length) {
+        resArr.push(res[0]);
+      }
+      return false;
+    } else {
+      return res;
+    }
+  };
+  const resArr = [];
+  const arrFor = (a, fn, index = 0) => {
+    a.forEach((e) => {
+      const res = fn(e, index);
+      if (res) {
+        arrFor(res, fn, index + 1);
+      }
     });
-  });
-  console.log(1214);
+  };
+  console.time("start");
+  arrFor([[]], match);
+  console.timeEnd("start");
+  console.log(1214, resArr);
 };
